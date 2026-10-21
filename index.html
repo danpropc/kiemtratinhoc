@@ -155,7 +155,8 @@
                 <p><b>• Phần 3 (Tự luận AI 2 câu):</b> <span id="out-p3" style="color:#2563eb; font-weight:bold;">0.0</span> / 2.0 điểm</p>
             </div>
 
-            <button type="button" class="btn" style="background-color: #d97706; margin-top: 25px;" onclick="openTeacherModal()">🔓 GIÁO VIÊN RESET CHO LỚP SAU THI</button>
+            <button type="button" class="btn" style="background-color: #16a34a; margin-top: 25px;" onclick="retryExam()">🔄 LÀM LẠI BÀI THI</button>
+            <button type="button" class="btn" style="background-color: #d97706; margin-top: 12px;" onclick="openTeacherModal()">🔓 GIÁO VIÊN RESET CHO LỚP SAU THI</button>
         </div>
     </div>
 
@@ -472,7 +473,7 @@
                 document.getElementById('student-stt').value = masterData.stt;
             }
 
-            const savedDone = localStorage.getItem('tin11_tonghop_done');
+            const savedDone = null;
             if (savedDone) {
                 try {
                     const data = JSON.parse(savedDone);
@@ -680,7 +681,7 @@
                 }
             }, 100);
 
-            localStorage.setItem('tin11_tonghop_done', JSON.stringify({
+            (function(){})( JSON.stringify({
                 name: studentData.name,
                 className: studentData.className,
                 stt: studentData.stt,
@@ -1514,7 +1515,7 @@
     };
 
     function checkCooldown() {
-        const lastSubmitTime = localStorage.getItem('quiz_last_submit_time');
+        const lastSubmitTime = null;
         if (lastSubmitTime) {
             const timePassed = Date.now() - parseInt(lastSubmitTime);
             if (timePassed < cooldownDuration) {
@@ -1645,7 +1646,7 @@
         isExamRunning = false;
         clearInterval(timerInterval);
 
-        localStorage.setItem('quiz_last_submit_time', Date.now().toString());
+        
 
         const stt = document.getElementById('student-stt').value;
         const name = document.getElementById('student-name').value;
@@ -2004,7 +2005,7 @@
         });
 
         function checkLockStatus() {
-            const lockUntil = localStorage.getItem('exam_lock_until');
+            const lockUntil = null;
             if (lockUntil) {
                 const now = Date.now();
                 if (now < parseInt(lockUntil)) {
@@ -2245,9 +2246,9 @@
             isExamActive = false;
 
             // Lock system for 20 minutes
-            localStorage.setItem('exam_lock_until', Date.now() + 20 * 60 * 1000);
+            
 
-            alert(`CẢNH BÁO GIAN LẬN!\nHệ thống phát hiện vi phạm quy chế: ${reason}.\nBài làm của bạn sẽ được tự động nộp ngay lập tức! Hệ thống khóa 20 phút.`);
+            alert(`CẢNH BÁO GIAN LẬN!\nHệ thống phát hiện vi phạm quy chế: ${reason}.\nBài làm của bạn sẽ được tự động nộp ngay lập tức!`);
             document.getElementById('cheat-flag-banner').classList.remove('hidden');
             processGrading();
         }
@@ -2296,7 +2297,7 @@
         function confirmSubmit() {
             if (confirm("Bạn có chắc chắn muốn nộp bài và bắt đầu chấm điểm không?")) {
                 isExamActive = false;
-                localStorage.setItem('exam_lock_until', Date.now() + 20 * 60 * 1000);
+                
                 processGrading();
             }
         }
@@ -2533,11 +2534,22 @@ YÊU CẦU ĐẦU RA JSON KHÔNG DÙNG BACKTICKS (Chỉ dùng thuần JSON):
 </html></script>
 <script>
 
+        // Cho phép làm lại nhiều lần: giữ họ tên/lớp/STT, xóa điểm cũ và các khóa thời gian
+        function retryExam() {
+            let d = {};
+            try { d = JSON.parse(localStorage.getItem('master_exam_data') || '{}'); } catch (e) {}
+            const keep = { name: d.name || '', className: d.className || '', stt: d.stt || '', step: 1, p1: null, p2: null, p3: null };
+            localStorage.setItem('master_exam_data', JSON.stringify(keep));
+            ['tin11_tonghop_done', 'quiz_last_submit_time', 'exam_lock_until'].forEach(k => localStorage.removeItem(k));
+            sessionStorage.removeItem('downloaded_txt_session');
+            location.reload();
+        }
+
         // ===== GỘP 4 TRANG: chạy các phần thi trong khung riêng, cùng origin/localStorage =====
         function showStage(n) {
             const tpl = document.getElementById('tpl-' + n);
             const frame = document.getElementById('exam-frame');
-            frame.srcdoc = tpl.textContent.split('<\\/script').join('</script');
+            frame.srcdoc = tpl.textContent.replace(/<\\\/script/g, '</script');
             frame.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
@@ -2591,6 +2603,7 @@ YÊU CẦU ĐẦU RA JSON KHÔNG DÙNG BACKTICKS (Chỉ dùng thuần JSON):
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            try { const pd = JSON.parse(localStorage.getItem('master_exam_data') || '{}'); if (pd.name) { document.getElementById('student-name').value = pd.name; document.getElementById('student-class').value = pd.className || ''; document.getElementById('student-stt').value = pd.stt || ''; } } catch (e) {}
             checkExamState();
 
             const passInput = document.getElementById('teacher-pass-input');

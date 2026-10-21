@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra Trắc Nghiệm Đúng - Sai Tin Học 11</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px 30px 30px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-teacher-unlock {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: auto;
+            z-index: 10;
+        }
+        .btn-teacher-unlock:hover {
+            background-color: #d35400;
+        }
+        .question-card {
+            background: #fafafa;
+            border-left: 5px solid #3498db;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+        }
+        .sub-question {
+            margin: 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .options label {
+            display: inline-block;
+            margin-left: 15px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        #lock-screen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 9999;
+            padding: 30px 40px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .result-layout {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+        .student-info-output {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #2c3e50;
+        }
+        .score-output {
+            font-size: 80px;
+            font-weight: 900;
+            color: #e74c3c;
+            margin-right: 30px;
+            line-height: 1;
+        }
+        .warning-msg {
+            color: #c0392b;
+            font-weight: bold;
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        #timer {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 10px;
+        }
+        .explanation-container {
+            margin-top: 30px;
+            border-top: 2px solid #e74c3c;
+            padding-top: 20px;
+        }
+        .explanation-title {
+            color: #c0392b;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        .wrong-item {
+            background-color: #fdf2e9;
+            border-left: 4px solid #e67e22;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .wrong-item-header {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .wrong-item-details {
+            font-size: 15px;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+        .wrong-item-exp {
+            font-size: 14px;
+            color: #27ae60;
+            font-style: italic;
+            background: #eafaf1;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-top: 6px;
+        }
+        #teacher-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 350px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+    </style>
+</head>
+<body>
+
+<div id="main-app" class="container">
+    <button class="btn-teacher-unlock" onclick="openTeacherModal()">🔑 GV Mở Khóa</button>
+
+    <div id="start-screen">
+        <h1>BÀI KIỂM TRA TRẮC NGHIỆM TIN HỌC 11</h1>
+        <h2>Sách Kết Nối Tri Thức - GV: Vũ Thị Thu Thảo</h2>
+        <p style="text-align: center; color: #7f8c8d;">Hệ thống chọn ngẫu nhiên 2 câu hỏi. Đúng mỗi ý nhỏ được 0.25 điểm. Tổng: 2 điểm.</p>
+        
+        <div id="cooldown-message" style="display:none; color:#c0392b; font-weight:bold; text-align:center; margin-bottom:20px;"></div>
+
+        <div class="form-group">
+            <label for="student-stt">Số thứ tự (STT):</label>
+            <input type="text" id="student-stt" placeholder="Nhập số thứ tự của em...">
+        </div>
+        <div class="form-group">
+            <label for="student-name">Họ và tên học sinh:</label>
+            <input type="text" id="student-name" placeholder="Nhập đầy đủ họ tên...">
+        </div>
+        <div class="form-group">
+            <label for="student-class">Lớp:</label>
+            <input type="text" id="student-class" placeholder="Nhập tên lớp...">
+        </div>
+        <button id="btn-start" onclick="startQuiz()">Bắt Đầu Làm Bài</button>
+    </div>
+
+    <div id="quiz-screen" style="display: none;">
+        <div id="timer">Thời gian còn lại: <span id="time-left">04:00</span></div>
+        <div id="quiz-container"></div>
+        <button id="btn-submit" onclick="finishQuiz(false)">Nộp Bài</button>
+    </div>
+</div>
+
+<div id="teacher-modal">
+    <div class="modal-content">
+        <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">🔑 Xác thực Giáo viên</h3>
+        <p style="font-size: 14px; color: #7f8c8d; text-align: center;">Nhập mật khẩu để hủy thời gian chờ:</p>
+        <input type="password" id="teacher-pass-input" placeholder="Nhập mật khẩu..." style="width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 16px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px;">
+            <button onclick="submitTeacherPass()" style="background-color: #27ae60; flex: 1; padding: 10px;">Xác Nhận</button>
+            <button onclick="closeTeacherModal()" style="background-color: #7f8c8d; flex: 1; padding: 10px;">Hủy</button>
+        </div>
+    </div>
+</div>
+
+<div id="lock-screen">
+    <div id="cheat-warning" class="warning-msg" style="display: none;">
+        PHÁT HIỆN HÀNH VI GIAN LẬN (MỞ CODE/F12/THAY ĐỔI CỬA SỔ)! BÀI THI LẬP TỨC KẾT THÚC.
+    </div>
+    <div class="result-layout">
+        <div class="student-info-output">
+            <h2 style="text-align: left; margin-top: 0;">KẾT QUẢ BÀI LÀM</h2>
+            <div><strong>Số Thứ Tự:</strong> <span id="out-stt">---</span></div>
+            <div><strong>Họ và Tên:</strong> <span id="out-name">---</span></div>
+            <div><strong>Lớp:</strong> <span id="out-class">---</span></div>
+            <div id="cooldown-notice" style="margin-top:10px; color:#e67e22; font-size:16px; font-weight:bold;"></div>
+        </div>
+        <div class="score-output" id="out-score">0.0</div>
+    </div>
+
+    <div class="explanation-container" id="explanation-section">
+        <h3 class="explanation-title">📌 Chi Tiết Các Ý Làm Chưa Đúng & Lời Giải Thích:</h3>
+        <div id="wrong-answers-list"></div>
+    </div>
+</div>
+
+<script>
+    // Ngân hàng 30 câu hỏi Đúng - Sai Tin học 11 kèm Lời giải thích chi tiết
+    const questionBank = [
+        {
+            text: "Câu 1: Phát biểu về hệ điều hành di động và hệ điều hành máy tính:",
+            sub: [
+                { id: "1a", text: "a) Ngoài máy tính cá nhân, các thiết bị điện gia dụng như Smart Tivi cũng có thể sử dụng các hệ điều hành như Android TV, WebOS, Tizen." },
+                { id: "1b", text: "b) Hệ điều hành Linux được phát triển từ năm 1991 dựa trên nền tảng của hệ điều hành Windows." },
+                { id: "1c", text: "c) Hệ điều hành Unix bao gồm ba thành phần chính là Kernel, Shell và Program." },
+                { id: "1d", text: "d) Hệ điều hành Linux được viết chủ yếu bằng ngôn ngữ lập trình Pascal." }
+            ],
+            ans: { "1a": "Đ", "1b": "S", "1c": "Đ", "1d": "S" },
+            explain: {
+                "1a": "Các dòng Smart Tivi hiện nay ứng dụng các hệ điều hành như Android TV, WebOS, Tizen...",
+                "1b": "Hệ điều hành Linux được phát triển dựa trên nền tảng của hệ điều hành UNIX chứ không phải Windows.",
+                "1c": "Unix được cấu tạo gồm ba phần cốt lõi: Kernel (nhân), Shell (vỏ/giao diện) và Program (các chương trình).",
+                "1d": "Hệ điều hành Linux được viết bằng ngôn ngữ lập trình C."
+            }
+        },
+        {
+            text: "Câu 2: Các phát biểu về công cụ tối ưu hệ thống trên Windows:",
+            sub: [
+                { id: "2a", text: "a) Việc phân mảnh tệp tin xảy ra khi các phần của tệp bị lưu rải rác trên nhiều vùng trống khác nhau của ổ đĩa cứng." },
+                { id: "2b", text: "b) Tiện ích Defragment (hợp mảnh) giúp gom các phần của tệp lại gần nhau trên các đường ghi (track) để tăng tốc độ đọc/ghi dữ liệu." },
+                { id: "2c", text: "c) Để kiểm tra và khắc phục lỗi mất liên kết tệp tin, người dùng chọn tiện ích Disk Cleanup trong thẻ Tools của cửa sổ Properties ổ đĩa." },
+                { id: "2d", text: "d) Tiện ích Disk Cleanup có vai trò dọn dẹp các tệp rác và tệp tạm thời để giải phóng dung lượng đĩa cứng." }
+            ],
+            ans: { "2a": "Đ", "2b": "Đ", "2c": "S", "2d": "Đ" },
+            explain: {
+                "2a": "Tệp tin bị phân mảnh là do các phần dữ liệu bị phân tán ở nhiều vùng trống trên ổ cứng sau thời gian dài sử dụng.",
+                "2b": "Quá trình hợp mảnh gom các phần tệp lại gần nhau trên đường ghi (track), làm giảm thời gian dịch chuyển đầu đọc của ổ cứng.",
+                "2c": "Để khắc phục lỗi cấu trúc tệp hoặc mất liên kết, ta sử dụng tiện ích Check disk (nút Check) trong thẻ Tools, không phải Disk Cleanup.",
+                "2d": "Disk Cleanup chuyên tìm và xóa tệp tạm, tệp rác không còn dùng để tăng dung lượng trống."
+            }
+        },
+        {
+            text: "Câu 3: Phát biểu về tính năng trên hệ điều hành di động và quản lý tệp:",
+            sub: [
+                { id: "3a", text: "a) Tiện ích Application Manager trong phần Cài đặt cho phép người dùng gỡ bỏ các ứng dụng không cần thiết khi bộ nhớ báo đầy." },
+                { id: "3b", text: "b) Phương thức sinh trắc học trên thiết bị di động như nhận dạng vân tay có tính bảo mật kém hơn mật khẩu chuỗi ký tự truyền thống." },
+                { id: "3c", text: "c) Nhược điểm lớn nhất của xác thực bằng khuôn mặt là người dùng phải ghi nhớ các chuỗi ký tự phức tạp." },
+                { id: "3d", text: "d) Khi nhấp chuột phải vào tệp tin trong File Explorer, bảng chọn lối tắt (shortcut menu) sẽ cung cấp các chức năng như Open, Cut, Copy, Delete, Rename." }
+            ],
+            ans: { "3a": "Đ", "3b": "S", "3c": "S", "3d": "Đ" },
+            explain: {
+                "3a": "Trình quản lý ứng dụng (Application Manager) hỗ trợ xem danh sách và gỡ ứng dụng để giải phóng bộ nhớ.",
+                "3b": "Phương thức sinh trắc học có độ bảo mật cao hơn vì đặc điểm sinh học của mỗi người là duy nhất, rất khó bị sao chép hay đoán mò.",
+                "3c": "Ưu điểm lớn nhất của sinh trắc học là tính tiện lợi vì không cần phải nhớ bất kỳ chuỗi ký tự phức tạp nào.",
+                "3d": "Bảng chọn chuột phải cung cấp đầy đủ các thao tác nhanh cơ bản để xử lý tệp."
+            }
+        },
+        {
+            text: "Câu 4: Nhận định về chỉ số FLOPS và hiệu suất máy tính cá nhân:",
+            sub: [
+                { id: "4a", text: "a) FLOPS là chỉ số đo số lượng phép tính số nguyên được thực hiện trong một giây." },
+                { id: "4b", text: "b) Các tác vụ thông thường trên máy tính cá nhân (PC) tập trung chủ yếu vào phép tính nguyên và xử lý chuỗi." },
+                { id: "4c", text: "c) FLOPS là chỉ số tiêu chuẩn hàng đầu được dùng phổ biến để đo hiệu năng của các máy tính cá nhân hiện đại." },
+                { id: "4d", text: "d) Hiệu suất PC hiện đại được đo lường chính xác hơn dựa trên tốc độ xử lý, dung lượng bộ nhớ và kích thước cache." }
+            ],
+            ans: { "4a": "S", "4b": "Đ", "4c": "S", "4d": "Đ" },
+            explain: {
+                "4a": "FLOPS (Floating Operation Per Second) đo số lượng phép tính dấu chấm động mỗi giây.",
+                "4b": "Các công việc văn phòng, giải trí cơ bản trên PC ít dùng phép tính dấu chấm động mà dùng phép tính nguyên và xử lý chuỗi.",
+                "4c": "Chỉ số FLOPS ít được dùng cho máy tính cá nhân.",
+                "4d": "Hiệu năng PC ngày nay được đánh giá chính xác hơn qua tốc độ vi xử lý, dung lượng RAM và bộ nhớ đệm cache."
+            }
+        },
+        {
+            text: "Câu 5: Nhận định về đặc điểm và công nghệ của máy quét ảnh:",
+            sub: [
+                { id: "5a", text: "a) Máy quét ảnh là thiết bị ra có chức năng hiển thị hình ảnh từ máy tính lên giấy." },
+                { id: "5b", text: "b) Cảm biến CCD cho chất lượng hình ảnh cao, dải màu tốt nhưng kích thước cồng kềnh và chi phí cao." },
+                { id: "5c", text: "c) Cảm biến CIS có ưu điểm nhỏ gọn, giá rẻ, tiết kiệm điện và cực kỳ thích hợp để quét các vật thể 3D." },
+                { id: "5d", text: "d) Công nghệ quét 3D được sử dụng để ghi lại hình dạng đối tượng thành tệp 3D phục vụ lưu trữ, chỉnh sửa hoặc in 3D." }
+            ],
+            ans: { "5a": "S", "5b": "Đ", "5c": "S", "5d": "Đ" },
+            explain: {
+                "5a": "Máy quét ảnh là thiết bị vào có chức năng quét thông tin hình ảnh bên ngoài và chuyển dữ liệu vào máy tính.",
+                "5b": "Cảm biến CCD có chất lượng ảnh vượt trội, ít nhiễu nhưng cồng kềnh và đắt tiền hơn.",
+                "5c": "Cảm biến CIS nhỏ gọn, rẻ nhưng không phù hợp để quét các vật thể 3D.",
+                "5d": "Quét 3D số hóa hình dạng vật thể thực thành mô hình 3D để lưu trữ hay in 3D."
+            }
+        },
+        {
+            text: "Câu 6: Các phát biểu liên quan đến máy chiếu và thông số kỹ thuật:",
+            sub: [
+                { id: "6a", text: "a) Máy chiếu là thiết bị vào dùng để thu hình ảnh từ màn chiếu vào máy tính." },
+                { id: "6b", text: "b) Công nghệ máy chiếu LCD phổ biến hoạt động dựa trên việc tách nguồn sáng trắng thành 3 màu cơ bản: Đỏ, Lục, Xanh dương." },
+                { id: "6c", text: "c) Cường độ sáng của máy chiếu thường được đo bằng đơn vị ANSI Lumens." },
+                { id: "6d", text: "d) Tuổi thọ bóng đèn và độ phân giải không ảnh hưởng đến chất lượng hay chi phí sử dụng máy chiếu." }
+            ],
+            ans: { "6a": "S", "6b": "Đ", "6c": "Đ", "6d": "S" },
+            explain: {
+                "6a": "Máy chiếu là thiết bị ra dùng để phóng to và hiển thị hình ảnh/văn bản lên màn chiếu.",
+                "6b": "Màn chiếu LCD tách ánh sáng trắng qua các tấm LCD độc lập đại diện cho 3 màu cơ bản RGB (Đỏ, Lục, Xanh dương).",
+                "6c": "ANSI Lumens là đơn vị chuẩn đo độ sáng của máy chiếu.",
+                "6d": "Độ phân giải (Full HD, 4K) và tuổi thọ bóng đèn là các thông số kỹ thuật quan trọng nhất quyết định độ nét và độ bền/chi phí vận hành."
+            }
+        },
+        {
+            text: "Câu 7: Nhận định về các chuẩn kết nối và cách thiết lập:",
+            sub: [
+                { id: "7a", text: "a) Cách thức kết nối các thiết bị số với máy tính hoàn toàn giống nhau cho mọi loại thiết bị." },
+                { id: "7b", text: "b) Mỗi thiết bị số đòi hỏi các cổng giao tiếp (USB, HDMI, VGA...) khác nhau do đặc thù về tốc độ truyền dữ liệu và cấu trúc phần cứng." },
+                { id: "7c", text: "c) Khi kết nối laptop với tivi qua cổng HDMI, ta sử dụng tổ hợp phím Windows + P để chọn chế độ hiển thị như Extend hoặc Duplicate." },
+                { id: "7d", text: "d) Mọi thiết bị số khi kết nối với máy tính bắt buộc phải sử dụng dây cáp không dây Bluetooth." }
+            ],
+            ans: { "7a": "S", "7b": "Đ", "7c": "Đ", "7d": "S" },
+            explain: {
+                "7a": "Cách kết nối phụ thuộc vào từng loại thiết bị, không thể giống nhau cho tất cả.",
+                "7b": "Do sự khác nhau về tốc độ truyền, tính di động mà mỗi thiết bị dùng chuẩn dây (USB, HDMI...) hoặc không dây khác nhau.",
+                "7c": "Phím tắt Windows + P cho phép chuyển nhanh chế độ chiếu màn hình trên hệ điều hành Windows.",
+                "7d": "Thiết bị có thể kết nối bằng dây cáp (USB, HDMI, VGA) hoặc không dây (Bluetooth, Wi-Fi)."
+            }
+        },
+        {
+            text: "Câu 8: Khi chọn mua màn hình máy tính, các phát biểu sau đây đúng hay sai?",
+            sub: [
+                { id: "8a", text: "a) Kích thước màn hình là yếu tố quyết định không gian hiển thị làm việc." },
+                { id: "8b", text: "b) Độ phân giải là số lượng điểm ảnh; độ phân giải càng cao thì hình ảnh hiển thị càng sắc nét." },
+                { id: "8c", text: "c) Tần số quét đo thời gian một điểm ảnh đổi màu, tính bằng miligiây." },
+                { id: "8d", text: "d) Thời gian phản hồi thể hiện tốc độ chuyển đổi màu của điểm ảnh, ảnh hưởng đến độ mượt khi chuyển động hình ảnh." }
+            ],
+            ans: { "8a": "Đ", "8b": "Đ", "8c": "S", "8d": "Đ" },
+            explain: {
+                "8a": "Kích thước (inch) xác định không gian làm việc thực tế của màn hình.",
+                "8b": "Độ phân giải chỉ số lượng điểm ảnh (pixels), quyết định độ nét của hình ảnh.",
+                "8c": "Tần số quét là số khung hình hiển thị trong một giây (Hz). Đo thời gian điểm ảnh đổi màu là thời gian phản hồi.",
+                "8d": "Thời gian phản hồi càng nhanh giúp hình ảnh chuyển động không bị nhòe hay bóng ma."
+            }
+        },
+        {
+            text: "Câu 9: Phát biểu về quy định của giấy phép phần mềm nguồn mở (GPL):",
+            sub: [
+                { id: "9a", text: "a) Người sửa đổi phần mềm nguồn mở có thể giấu đi thông tin các phần mình đã nâng cấp để bảo vệ bí mật kinh doanh." },
+                { id: "9b", text: "b) Giấy phép GPL yêu cầu công khai rõ ràng phần nào đã sửa và sửa như thế nào so với bản gốc nhằm minh bạch thông tin." },
+                { id: "9c", text: "c) Một phần mềm được cải tiến từ phần mềm nguồn mở theo giấy phép GPL bắt buộc cũng phải được mở theo giấy phép GPL." },
+                { id: "9d", text: "d) Giấy phép GPL cho phép nhà phát triển đóng gói và bán mã nguồn đã cải tiến thành phần mềm thương mại độc quyền." }
+            ],
+            ans: { "9a": "S", "9b": "Đ", "9c": "Đ", "9d": "S" },
+            explain: {
+                "9a": "Người sửa đổi phải công bố rõ ràng phần nào đã sửa và sửa thế nào để tôn trọng bản quyền tác giả.",
+                "9b": "Điều này đảm bảo sự minh bạch thông tin và tôn trọng tác giả gốc.",
+                "9c": "Tính chất kế thừa của GPL đảm bảo phần mềm cải tiến luôn giữ tính mở và miễn phí cho cộng đồng.",
+                "9d": "Giấy phép GPL ngăn chặn việc biến phần mềm nguồn mở thành phần mềm thương mại độc quyền đóng mã nguồn."
+            }
+        },
+        {
+            text: "Câu 10: Nhận định về đặc điểm của các loại phần mềm:",
+            sub: [
+                { id: "10a", text: "a) Microsoft Office là một ví dụ điển hình về phần mềm đóng gói thương mại." },
+                { id: "10b", text: "b) LibreOffice Writer là phần mềm thương mại có thể thay thế cho Microsoft Word." },
+                { id: "10c", text: "c) Ưu điểm nổi bật của phần mềm thương mại là có tính năng hoàn thiện, độ an toàn cao và dịch vụ hỗ trợ kỹ thuật chuyên nghiệp." },
+                { id: "10d", text: "d) Phần mềm đặt hàng là phần mềm được bán rộng rãi trên thị trường cho mọi đối tượng như các phần mềm đóng gói." }
+            ],
+            ans: { "10a": "Đ", "10b": "S", "10c": "Đ", "10d": "S" },
+            explain: {
+                "10a": "MS Office là phần mềm thương mại dạng đóng gói.",
+                "10b": "LibreOffice Writer là phần mềm nguồn mở miễn phí dùng để thay thế MS Word.",
+                "10c": "Phần mềm thương mại đầu tư mạnh về hỗ trợ kỹ thuật và độ hoàn thiện tính năng.",
+                "10d": "Phần mềm đặt hàng được thiết kế riêng theo nhu cầu của từng đơn vị cụ thể (ví dụ: Hệ thống quản lý học sinh của nhà trường)."
+            }
+        },
+        {
+            text: "Câu 11: Phát biểu về sự tương quan giữa các loại phần mềm và ngôn ngữ lập trình:",
+            sub: [
+                { id: "11a", text: "a) Sự phát triển mạnh mẽ của phần mềm nguồn mở sẽ làm cho thị trường phần mềm thương mại bị diệt vong hoàn toàn." },
+                { id: "11b", text: "b) Các doanh nghiệp vẫn cần phần mềm thương mại nhờ độ bảo mật cao và dịch vụ hỗ trợ kỹ thuật chuyên nghiệp." },
+                { id: "11c", text: "c) Vì ngôn ngữ Python không biên dịch sang mã máy mà ở dạng mã nguồn, mọi phần mềm viết bằng Python đều mặc nhiên là phần mềm nguồn mở." },
+                { id: "11d", text: "d) Việc một phần mềm có phải là nguồn mở hay không phụ thuộc vào giấy phép bản quyền do tác giả quyết định." }
+            ],
+            ans: { "11a": "S", "11b": "Đ", "11c": "S", "11d": "Đ" },
+            explain: {
+                "11a": "Thị trường phần mềm thương mại không suy giảm hay biến mất vì nhu cầu doanh nghiệp về tính chuyên nghiệp vẫn rất lớn.",
+                "11b": "Doanh nghiệp cần dịch vụ hỗ trợ và cam kết bảo mật từ các công ty phần mềm thương mại.",
+                "11c": "Ngôn ngữ lập trình không quyết định bản quyền; phần mềm Python vẫn có thể là phần mềm thương mại đóng mã.",
+                "11d": "Quyền quyết định phần mềm có mở hay không thuộc về giấy phép bản quyền của tác giả."
+            }
+        },
+        {
+            text: "Câu 12: Nhận định về phần mềm ứng dụng mạng và thiết bị chuyên dụng:",
+            sub: [
+                { id: "12a", text: "a) Ưu điểm của phần mềm chạy trên Internet là không tốn dung lượng cài đặt trên máy và truy cập được mọi lúc mọi nơi." },
+                { id: "12b", text: "b) Google Docs và Canva là các ví dụ về phần mềm trực tuyến." },
+                { id: "12c", text: "c) Phần mềm điều khiển tại các cây rút tiền tự động (ATM) là một phần mềm trực tuyến chạy trên trình duyệt web." },
+                { id: "12d", text: "d) Phần mềm máy ATM thuộc loại phần mềm nhúng chuyên dụng chạy nội bộ trên hệ thống máy ATM." }
+            ],
+            ans: { "12a": "Đ", "12b": "Đ", "12c": "S", "12d": "Đ" },
+            explain: {
+                "12a": "Phần mềm trực tuyến lưu trên Cloud, giúp tiết kiệm bộ nhớ máy cá nhân.",
+                "12b": "Đây là các công cụ xử lý văn bản, đồ họa chạy trực tiếp trên web.",
+                "12c": "Phần mềm máy ATM không phải phần mềm trực tuyến.",
+                "12d": "Đó là phần mềm nhúng chuyên dụng để đảm bảo an toàn giao dịch nội bộ."
+            }
+        },
+        {
+            text: "Câu 13: Các nhận định về dịch vụ lưu trữ trực tuyến:",
+            sub: [
+                { id: "13a", text: "a) Dịch vụ lưu trữ trực tuyến gọi là 'Lưu trữ đám mây' vì dữ liệu lưu trên các máy chủ kết nối Internet." },
+                { id: "13b", text: "b) Người dùng chỉ có thể truy cập tệp trên đám mây khi sử dụng đúng máy tính cá nhân ban đầu đã tải tệp lên." },
+                { id: "13c", text: "c) Dữ liệu lưu trên mây có thể truy cập mọi lúc, mọi nơi chỉ cần thiết bị có kết nối Internet." },
+                { id: "13d", text: "d) Khi lưu trữ đám mây, người dùng bắt buộc phải biết rõ chính xác vị trí địa lý của máy chủ chứa tệp." }
+            ],
+            ans: { "13a": "Đ", "13b": "S", "13c": "Đ", "13d": "S" },
+            explain: {
+                "13a": "Khái niệm 'đám mây' xuất phát từ việc dữ liệu lưu tập trung ở máy chủ nhà cung cấp qua Internet.",
+                "13b": "Người dùng có thể dùng bất kỳ thiết bị nào đăng nhập được tài khoản để truy cập tệp.",
+                "13c": "Tính di động là ưu điểm lớn nhất của lưu trữ đám mây.",
+                "13d": "Người dùng không cần biết dữ liệu thực sự nằm trên máy chủ vật lý nào, giống như nhìn thấy mây trên trời."
+            }
+        },
+        {
+            text: "Câu 14: Phát biểu về tính chất của dịch vụ lưu trữ Internet:",
+            sub: [
+                { id: "14a", text: "a) Lưu trữ trên đám mây giúp giảm thiểu nguy cơ mất dữ liệu khi thiết bị cá nhân bị hỏng hóc hay mất mát." },
+                { id: "14b", text: "b) Lưu trữ đám mây cho phép nhiều người cùng lúc chỉnh sửa và chia sẻ tài liệu trực tuyến." },
+                { id: "14c", text: "c) Nhược điểm của lưu trữ đám mây là hoàn toàn không bị ảnh hưởng khi mất kết nối Internet." },
+                { id: "14d", text: "d) Các nhà cung cấp dịch vụ đám mây luôn cung cấp dung lượng lưu trữ miễn phí vô hạn cho mọi người dùng." }
+            ],
+            ans: { "14a": "Đ", "14b": "Đ", "14c": "S", "14d": "S" },
+            explain: {
+                "14a": "Dữ liệu được sao lưu trên máy chủ nên thiết bị cá nhân hỏng vẫn còn bản lưu.",
+                "14b": "Hỗ trợ làm việc nhóm (collaborative working) vô cùng hiệu quả.",
+                "14c": "Nhược điểm chính của lưu trữ đám mây là phụ thuộc vào kết nối Internet; mất mạng sẽ khó hoặc không truy cập được.",
+                "14d": "Dung lượng miễn phí luôn bị giới hạn (ví dụ Google Drive cho 15GB, Dropbox cho 2GB)."
+            }
+        },
+        {
+            text: "Câu 15: So sánh giữa phương thức truyền dữ liệu bằng Bluetooth và qua Internet:",
+            sub: [
+                { id: "15a", text: "a) Truyền dữ liệu qua Bluetooth không yêu cầu thiết bị phải có kết nối Internet." },
+                { id: "15b", text: "b) Khoảng cách truyền dữ liệu của Bluetooth rất rộng, không bị giới hạn trong khoảng 10 mét." },
+                { id: "15c", text: "c) Tốc độ truyền tệp của Bluetooth thường nhanh hơn so với tốc độ truyền qua Internet cao tốc." },
+                { id: "15d", text: "d) Chia sẻ qua Internet thuận tiện khi gửi tệp từ xa hoặc gửi đồng thời cho nhiều người." }
+            ],
+            ans: { "15a": "Đ", "15b": "S", "15c": "S", "15d": "Đ" },
+            explain: {
+                "15a": "Bluetooth kết nối sóng ngắn trực tiếp giữa 2 thiết bị.",
+                "15b": "Phạm vi truyền dữ liệu Bluetooth bị giới hạn ngắn, chỉ khoảng 10m.",
+                "15c": "Tốc độ Bluetooth chậm hơn so với truyền qua mạng Internet.",
+                "15d": "Internet giải quyết tốt bài toán khoảng cách địa lý và chia sẻ số lượng lớn người nhận."
+            }
+        },
+        {
+            text: "Câu 16: Phát biểu về các dịch vụ lưu trữ trực tuyến Google Drive và Dropbox:",
+            sub: [
+                { id: "16a", text: "a) Google Drive cung cấp mức dung lượng miễn phí khởi đầu cho người dùng là 15GB." },
+                { id: "16b", text: "b) Dropbox cung cấp dung lượng miễn phí lớn hơn Google Drive, lên tới 50GB." },
+                { id: "16c", text: "c) Cả hai dịch vụ đều cho phép người dùng thực hiện thao tác tải tệp lên, tải tệp xuống và chia sẻ tệp." },
+                { id: "16d", text: "d) Google Drive thích hợp cho học sinh hơn vì tích hợp bộ công cụ như Google Docs, Sheets, Slides." }
+            ],
+            ans: { "16a": "Đ", "16b": "S", "16c": "Đ", "16d": "Đ" },
+            explain: {
+                "16a": "Google Drive cung cấp 15GB miễn phí.",
+                "16b": "Dung lượng miễn phí mặc định của Dropbox chỉ có 2GB, ít hơn nhiều so với Google Drive.",
+                "16c": "Cả 2 đều có tính năng cơ bản của lưu trữ đám mây.",
+                "16d": "Google Drive tích hợp sẵn hệ sinh thái văn phòng giúp học sinh học tập thuận tiện."
+            }
+        },
+        {
+            text: "Câu 17: Nhận định về việc sử dụng phần mềm RaiDrive để quản lý lưu trữ:",
+            sub: [
+                { id: "17a", text: "a) RaiDrive là phần mềm cho phép biến tài khoản đám mây (như Google Drive) thành một ổ đĩa ảo trên PC." },
+                { id: "17b", text: "b) Trong RaiDrive, nếu chọn mục 'Read-only' người dùng sẽ được quyền chỉnh sửa và xóa trực tiếp tệp trên ổ đĩa." },
+                { id: "17c", text: "c) Để RaiDrive liên kết với Google Drive, người dùng phải bấm Allow để cấp quyền truy cập quản lý tệp." },
+                { id: "17d", text: "d) Khi liên kết thành công qua RaiDrive, người dùng có thể xem phim trực tiếp trên Google Drive từ PC mà không cần tải tệp về." }
+            ],
+            ans: { "17a": "Đ", "17b": "S", "17c": "Đ", "17d": "Đ" },
+            explain: {
+                "17a": "RaiDrive giúp quản lý đám mây như một ổ đĩa cứng vật lý trên My Computer.",
+                "17b": "Chọn 'Read-only' nghĩa là ổ đĩa chỉ cho phép xem file, không được thao tác chỉnh sửa trực tiếp.",
+                "17c": "Bắt buộc phải xác thực quyền truy cập tài khoản Google.",
+                "17d": "RaiDrive cho phép truy xuất và streaming nội dung trực tiếp không cần download về máy."
+            }
+        },
+        {
+            text: "Câu 18: Các phát biểu về hệ điều hành Linux và phần mềm đồ họa:",
+            sub: [
+                { id: "18a", text: "a) Linux là một ví dụ điển hình về hệ điều hành mã nguồn mở." },
+                { id: "18b", text: "b) GIMP và Inkscape là hai phần mềm đồ họa nguồn mở nổi tiếng." },
+                { id: "18c", text: "c) Adobe Photoshop và Adobe Illustrator là các phần mềm đồ họa miễn phí mã nguồn mở." },
+                { id: "18d", text: "d) Hệ điều hành Unix chỉ bao gồm một thành phần duy nhất là Kernel." }
+            ],
+            ans: { "18a": "Đ", "18b": "Đ", "18c": "S", "18d": "S" },
+            explain: {
+                "18a": "Linux là hệ điều hành nguồn mở phát triển từ Unix.",
+                "18b": "GIMP và Inkscape là phần mềm xử lý ảnh và đồ họa vector nguồn mở.",
+                "18c": "Photoshop và Illustrator là phần mềm đồ họa thương mại bản quyền trả phí.",
+                "18d": "Hệ điều hành Unix gồm 3 thành phần: Kernel, Shell và Program."
+            }
+        },
+        {
+            text: "Câu 19: Nhận định về các thao tác bảo trì và đăng nhập trên thiết bị số:",
+            sub: [
+                { id: "19a", text: "a) Tệp tin bị phân mảnh làm cho đầu đọc ổ cứng phải di chuyển liên tục, làm giảm tốc độ máy tính." },
+                { id: "19b", text: "b) Tiện ích Check disk nằm trong thẻ Tools thuộc cửa sổ Properties của ổ đĩa." },
+                { id: "19c", text: "c) Sử dụng sinh trắc học như vân tay giúp tránh được nguy cơ bị đoán mò mật khẩu." },
+                { id: "19d", text: "d) Việc gỡ bỏ bớt ứng dụng không dùng đến sẽ làm gia tăng nguy cơ bộ nhớ bị đầy." }
+            ],
+            ans: { "19a": "Đ", "19b": "Đ", "19c": "Đ", "19d": "S" },
+            explain: {
+                "19a": "Đầu đọc dịch chuyển liên tục làm tăng thời gian truy xuất tệp.",
+                "19b": "Quy trình mở: Nhấp phải chuột ổ đĩa -> Properties -> Tools -> Check.",
+                "19c": "Tính duy nhất của vân tay giúp tăng độ bảo mật so với ký tự.",
+                "19d": "Gỡ bớt ứng dụng giúp giải phóng không gian lưu trữ, chống đầy bộ nhớ."
+            }
+        },
+        {
+            text: "Câu 20: Các phát biểu về thiết bị phần cứng:",
+            sub: [
+                { id: "20a", text: "a) Phép tính dấu chấm động là tiêu chuẩn đánh giá hiệu năng chính trên các máy tính cá nhân phục vụ văn phòng." },
+                { id: "20b", text: "b) Máy quét ảnh cảm biến CCD thường nhỏ gọn hơn máy quét cảm biến CIS." },
+                { id: "20c", text: "c) Cổng kết nối HDMI có thể truyền tải cả tín hiệu hình ảnh lẫn âm thanh từ laptop sang tivi." },
+                { id: "20d", text: "d) Độ tương phản và tỷ lệ chiếu (16:9, 4:3) là các thông số quan trọng của máy chiếu." }
+            ],
+            ans: { "20a": "S", "20b": "S", "20c": "Đ", "20d": "Đ" },
+            explain: {
+                "20a": "Tác vụ văn phòng dùng phép tính nguyên và xử lý chuỗi; chỉ số FLOPS (dấu chấm động) ít dùng.",
+                "20b": "Cảm biến CIS mới nhỏ gọn hơn, còn cảm biến CCD kích thước lớn và cồng kềnh.",
+                "20c": "Cáp HDMI truyền đồng thời cả video và audio chất lượng cao.",
+                "20d": "Đây là các chỉ số kỹ thuật ảnh hưởng trực tiếp đến hình ảnh hiển thị của máy chiếu."
+            }
+        },
+        {
+            text: "Câu 21: Nhận định về các thiết bị ngoại vi:",
+            sub: [
+                { id: "21a", text: "a) Tần số quét cao giúp chuyển động hình ảnh mượt mà hơn khi làm việc và chơi game." },
+                { id: "21b", text: "b) Máy quét ảnh là thiết bị ra dùng để in tài liệu từ máy tính ra giấy." },
+                { id: "21c", text: "c) Bật nguồn tivi và chọn đúng cổng vào (như HDMI 2) là bước bắt buộc khi kết nối trình chiếu từ máy tính." },
+                { id: "21d", text: "d) Thời gian phản hồi của màn hình được tính bằng giây (seconds); chỉ số này càng lớn càng tốt." }
+            ],
+            ans: { "21a": "Đ", "21b": "S", "21c": "Đ", "21d": "S" },
+            explain: {
+                "21a": "Tần số quét (Hz) cao tái hiện chuyển động hình ảnh rất mượt.",
+                "21b": "Máy quét (scanner) là thiết bị vào để nhập hình ảnh vào máy tính, không phải máy in.",
+                "21c": "Phải chọn đúng cổng nguồn vào trên Tivi/Máy chiếu để nhận tín hiệu.",
+                "21d": "Thời gian phản hồi tính bằng miligiây (ms), chỉ số này càng nhỏ mới càng tốt."
+            }
+        },
+        {
+            text: "Câu 22: Phát biểu về mô hình cung cấp phần mềm thương mại:",
+            sub: [
+                { id: "22a", text: "a) Phần mềm đóng gói được thiết kế phục vụ cho nhu cầu chung của nhiều người dùng khác nhau." },
+                { id: "22b", text: "b) Trang web quản lý học sinh của một trường học là ví dụ của phần mềm đóng gói." },
+                { id: "22c", text: "c) Phần mềm nguồn mở luôn thu phí bản quyền rất cao từ người sử dụng." },
+                { id: "22d", text: "d) Tự do sửa đổi và tùy biến mã nguồn là một ưu điểm lớn của phần mềm nguồn mở." }
+            ],
+            ans: { "22a": "Đ", "22b": "S", "22c": "S", "22d": "Đ" },
+            explain: {
+                "22a": "Phần mềm đóng gói (như MS Office) được sản xuất hàng loạt cho số đông.",
+                "22b": "Đó là phần mềm đặt hàng làm riêng theo yêu cầu của nhà trường.",
+                "22c": "Phần mềm nguồn mở thường miễn phí sử dụng.",
+                "22d": "Người dùng có quyền can thiệp vào mã nguồn để tùy chỉnh theo ý muốn."
+            }
+        },
+        {
+            text: "Câu 23: Nhận định về việc quản lý và sao lưu dữ liệu trên Internet:",
+            sub: [
+                { id: "23a", text: "a) Việc lưu trữ tệp trên Internet giúp tránh mất dữ liệu khi ổ cứng máy tính bị hỏng." },
+                { id: "23b", text: "b) Mọi dịch vụ đám mây đều có nguy cơ bị tấn công mạng hoặc lộ lọt dữ liệu." },
+                { id: "23c", text: "c) Để chia sẻ tệp cho người khác qua Google Drive, bắt buộc người nhận phải ở cùng phòng dưới 10 mét." },
+                { id: "23d", text: "d) Dropbox cung cấp tính năng đồng bộ hóa và quản lý tệp giữa nhiều thiết bị." }
+            ],
+            ans: { "23a": "Đ", "23b": "Đ", "23c": "S", "23d": "Đ" },
+            explain: {
+                "23a": "Dữ liệu an toàn trên đám mây khi phần cứng máy tính hư hỏng.",
+                "23b": "An ninh mạng luôn là nguy cơ nhược điểm lớn của dịch vụ Internet.",
+                "23c": "Giới hạn 10m là của Bluetooth; chia sẻ Google Drive qua Internet thực hiện không phụ thuộc khoảng cách.",
+                "23d": "Dropbox nổi tiếng với khả năng đồng bộ file mượt mà đa nền tảng."
+            }
+        },
+        {
+            text: "Câu 24: Các phát biểu về hệ điều hành di động và tiện ích quản lý:",
+            sub: [
+                { id: "24a", text: "a) Hệ điều hành Android TV được sử dụng rộng rãi trên các dòng Smart Tivi." },
+                { id: "24b", text: "b) Muốn mở bảng chọn shortcut menu cho một tệp tin, ta nháy chuột trái hai lần liên tiếp vào tệp đó." },
+                { id: "24c", text: "c) Bảng chọn shortcut menu cho phép tạo lối tắt (Create shortcut) cho tệp tin." },
+                { id: "24d", text: "d) Phương thức xác thực sinh trắc học giúp loại bỏ hoàn toàn việc phải nhớ các mật khẩu phức tạp." }
+            ],
+            ans: { "24a": "Đ", "24b": "S", "24c": "Đ", "24d": "Đ" },
+            explain: {
+                "24a": "Android TV là hệ điều hành gia dụng phổ biến trên TV thông minh.",
+                "24b": "Muốn xuất hiện bảng chọn shortcut menu ta phải nháy nút phải chuột.",
+                "24c": "Bảng chọn chuột phải chứa chức năng Create shortcut.",
+                "24d": "Sinh trắc học giúp xác thực nhanh qua đặc điểm cơ thể mà không cần nhớ chuỗi ký tự."
+            }
+        },
+        {
+            text: "Câu 25: Đặc điểm công nghệ của cảm biến CCD và CIS trên máy quét:",
+            sub: [
+                { id: "25a", text: "a) Cảm biến CCD giúp máy quét có kích thước rất mỏng nhẹ và tiết kiệm điện." },
+                { id: "25b", text: "b) Cảm biến CCD cho dải chuyển màu tốt và hình ảnh ít bị nhiễu." },
+                { id: "25c", text: "c) Cảm biến CIS có chi phí sản xuất cao hơn cảm biến CCD." },
+                { id: "25d", text: "d) Máy quét ứng dụng cảm biến CIS thích hợp để tạo ra máy quét thiết kế mỏng gọn." }
+            ],
+            ans: { "25a": "S", "25b": "Đ", "25c": "S", "25d": "Đ" },
+            explain: {
+                "25a": "Cảm biến CCD cồng kềnh, tiêu tốn điện năng hơn; mỏng nhẹ và tiết kiệm điện là cảm biến CIS.",
+                "25b": "CCD mang lại chất lượng hình ảnh cao và độ trung thực dải màu tốt nhất.",
+                "25c": "Cảm biến CIS có giá thành rẻ hơn CCD.",
+                "25d": "Cấu trúc nhỏ gọn của CIS giúp sản xuất các loại máy quét siêu mỏng."
+            }
+        },
+        {
+            text: "Câu 26: Các phát biểu về phần mềm thương mại và phần mềm trực tuyến:",
+            sub: [
+                { id: "26a", text: "a) Canva là phần mềm thiết kế đồ họa chạy trực tuyến qua mạng Internet." },
+                { id: "26b", text: "b) Phần mềm thương mại không cung cấp bất kỳ sự hỗ trợ kỹ thuật nào cho khách hàng." },
+                { id: "26c", text: "c) Phần mềm chạy trên Internet giúp người dùng truy cập làm việc từ xa rất tiện lợi." },
+                { id: "26d", text: "d) Mọi phần mềm nguồn mở đều bị cấm sử dụng trong các cơ quan, doanh nghiệp." }
+            ],
+            ans: { "26a": "Đ", "26b": "S", "26c": "Đ", "26d": "S" },
+            explain: {
+                "26a": "Canva là ứng dụng chạy trực tiếp trên nền tảng web.",
+                "26b": "Hỗ trợ kỹ thuật chuyên nghiệp là ưu điểm lớn nhất của phần mềm thương mại.",
+                "26c": "Chỉ cần kết nối mạng là có thể làm việc mọi lúc mọi nơi.",
+                "26d": "Phần mềm nguồn mở được khuyến khích sử dụng rộng rãi để tiết kiệm chi phí."
+            }
+        },
+        {
+            text: "Câu 27: Nhận định về phép tính dấu chấm động và hiệu suất xử lý:",
+            sub: [
+                { id: "27a", text: "a) FLOPS là viết tắt của cụm từ 'Floating Operation Per Second'." },
+                { id: "27b", text: "b) Máy tính cá nhân hiện đại không còn coi FLOPS là tiêu chuẩn đánh giá hiệu năng chính." },
+                { id: "27c", text: "c) Kích thước bộ nhớ đệm Cache không ảnh hưởng đến tốc độ thực thi của máy tính cá nhân." },
+                { id: "27d", text: "d) Máy tính cá nhân thường dùng nhiều phép tính dấu chấm động trong các công việc văn phòng hằng ngày." }
+            ],
+            ans: { "27a": "Đ", "27b": "Đ", "27c": "S", "27d": "S" },
+            explain: {
+                "27a": "Đúng định nghĩa tên gọi FLOPS.",
+                "27b": "PC ngày nay đo hiệu năng qua CPU, RAM, Cache chứ không dùng FLOPS làm thước đo chính.",
+                "27c": "Bộ nhớ Cache đóng vai trò cực kỳ quan trọng quyết định tốc độ xử lý của PC.",
+                "27d": "Tác vụ văn phòng ít dùng phép tính dấu chấm động."
+            }
+        },
+        {
+            text: "Câu 28: Các bước kết nối Google Drive vào máy tính bằng RaiDrive:",
+            sub: [
+                { id: "28a", text: "a) RaiDrive hỗ trợ liên kết tài khoản Google Drive thành ổ đĩa trên PC." },
+                { id: "28b", text: "b) Chọn 'Connect using different credentials' khi bạn chỉ muốn liên kết duy nhất 1 tài khoản cố định." },
+                { id: "28c", text: "c) Nhấn 'Allow' để cấp quyền cho RaiDrive quản lý các tệp trên đám mây." },
+                { id: "28d", text: "d) Sau khi liên kết thành công, các tệp Google Drive sẽ xuất hiện trong cửa sổ PC/My Computer như ổ đĩa cứng." }
+            ],
+            ans: { "28a": "Đ", "28b": "S", "28c": "Đ", "28d": "Đ" },
+            explain: {
+                "28a": "RaiDrive giúp ánh xạ tài khoản cloud thành ổ đĩa hệ thống.",
+                "28b": "Nút tick này dùng khi có nhu cầu liên kết nhiều tài khoản khác nhau.",
+                "28c": "Bước ủy quyền bắt buộc để phần mềm đọc/ghi dữ liệu.",
+                "28d": "Ổ đĩa mới xuất hiện trong My Computer cho phép thao tác như ổ cứng thật."
+            }
+        },
+        {
+            text: "Câu 29: Nhận định về các bước thao tác trên hệ điều hành Windows:",
+            sub: [
+                { id: "29a", text: "a) Chức năng Move to Trash / Delete trong shortcut menu dùng để xóa tệp tin." },
+                { id: "29b", text: "b) Tiện ích Optimize/Defragment giúp gom tệp tin phân mảnh lại gần nhau." },
+                { id: "29c", text: "c) Việc chọn đúng nguồn vào (Input Source) trên Tivi là không cần thiết khi nối cáp HDMI." },
+                { id: "29d", text: "d) Cáp VGA là cáp hiện đại duy nhất vừa truyền được hình ảnh Full HD vừa truyền được âm thanh chất lượng cao." }
+            ],
+            ans: { "29a": "Đ", "29b": "Đ", "29c": "S", "29d": "S" },
+            explain: {
+                "29a": "Đây là chức năng xóa tệp cơ bản.",
+                "29b": "Defragment tối ưu cấu trúc lưu trữ trên track đĩa.",
+                "29c": "Phải chọn đúng nguồn vào (ví dụ: HDMI 1, HDMI 2) thì Tivi mới hiển thị hình ảnh từ máy tính.",
+                "29d": "Cáp VGA là chuẩn cũ chỉ truyền hình ảnh (không truyền âm thanh). Chuẩn truyền cả ảnh và tiếng là HDMI."
+            }
+        },
+        {
+            text: "Câu 30: Các nhận định chung về công nghệ thông tin:",
+            sub: [
+                { id: "30a", text: "a) Linux được phát triển bằng ngôn ngữ C từ năm 1991." },
+                { id: "30b", text: "b) Mọi phần mềm chạy trên Internet đều yêu cầu người dùng phải trả phí dịch vụ hàng tháng." },
+                { id: "30c", text: "c) Dịch vụ Google Drive cho phép chia sẻ tệp với nhiều chế độ quyền truy cập khác nhau." },
+                { id: "30d", text: "d) Mở rộng bộ nhớ cá nhân là ưu điểm chính của phần mềm nhúng tại trạm ATM." }
+            ],
+            ans: { "30a": "Đ", "30b": "S", "30c": "Đ", "30d": "S" },
+            explain: {
+                "30a": "Đúng mốc thời gian và ngôn ngữ phát triển hệ điều hành Linux.",
+                "30b": "Rất nhiều phần mềm trực tuyến cung cấp bản dùng miễn phí (ví dụ: Google Docs, Canva...).",
+                "30c": "Google Drive cung cấp các chế độ chia sẻ đa dạng (Xem, Nhận xét, Chỉnh sửa).",
+                "30d": "Phần mềm nhúng máy ATM dùng để thực hiện giao dịch ngân hàng an toàn, không phải để mở rộng bộ nhớ máy cá nhân."
+            }
+        }
+    ];
+
+    let selectedQuestions = [];
+    let isExamRunning = false;
+    let timerInterval;
+    const cooldownDuration = 20 * 60 * 1000; // 20 phút thành miliseconds
+
+    window.onload = function() {
+        // Tự động lấy thông tin từ master_exam_data
+        const masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+        if (masterData && masterData.name && masterData.className && masterData.stt) {
+            document.getElementById('student-name').value = masterData.name;
+            document.getElementById('student-class').value = masterData.className;
+            document.getElementById('student-stt').value = masterData.stt;
+        }
+
+        checkCooldown();
+        
+        const passInput = document.getElementById('teacher-pass-input');
+        if (passInput) {
+            passInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitTeacherPass();
+                }
+            });
+        }
+    };
+
+    function checkCooldown() {
+        const lastSubmitTime = localStorage.getItem('quiz_last_submit_time');
+        if (lastSubmitTime) {
+            const timePassed = Date.now() - parseInt(lastSubmitTime);
+            if (timePassed < cooldownDuration) {
+                const timeRemaining = cooldownDuration - timePassed;
+                const minutes = Math.floor(timeRemaining / 60000);
+                const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                
+                document.getElementById('btn-start').disabled = true;
+                document.getElementById('btn-start').style.backgroundColor = '#bdc3c7';
+                document.getElementById('btn-start').innerText = "Đang trong thời gian chờ làm lại...";
+                
+                const coolMsg = document.getElementById('cooldown-message');
+                coolMsg.style.display = 'block';
+                coolMsg.innerHTML = `Bạn đã nộp bài. Hãy đợi hoặc dùng mã GV để mở khóa: <span style='font-size: 18px;'>${minutes} phút ${seconds} giây</span>`;
+                
+                setTimeout(checkCooldown, 1000);
+                return true;
+            }
+        }
+        document.getElementById('btn-start').disabled = false;
+        document.getElementById('btn-start').style.backgroundColor = '#3498db';
+        document.getElementById('btn-start').innerText = "Bắt Đầu Làm Bài";
+        document.getElementById('cooldown-message').style.display = 'none';
+        return false;
+    }
+
+    function openTeacherModal() {
+        document.getElementById('teacher-pass-input').value = '';
+        document.getElementById('teacher-modal').style.display = 'flex';
+        document.getElementById('teacher-pass-input').focus();
+    }
+
+    function closeTeacherModal() {
+        document.getElementById('teacher-modal').style.display = 'none';
+    }
+
+    function submitTeacherPass() {
+        const pass = document.getElementById('teacher-pass-input').value;
+        if (pass === "@COMUATHU123") {
+            localStorage.removeItem('quiz_last_submit_time');
+            closeTeacherModal();
+            alert("Mở khóa thành công! Hệ thống đã khôi phục trạng thái làm bài mới.");
+            location.reload();
+        } else {
+            alert("Mật khẩu không chính xác!");
+            document.getElementById('teacher-pass-input').value = '';
+            document.getElementById('teacher-pass-input').focus();
+        }
+    }
+
+    function startQuiz() {
+        if (checkCooldown()) return;
+
+        const stt = document.getElementById('student-stt').value.trim();
+        const name = document.getElementById('student-name').value.trim();
+        const sClass = document.getElementById('student-class').value.trim();
+
+        if (!stt || !name || !sClass) {
+            alert("Vui lòng điền đầy đủ Số thứ tự, Họ tên và Lớp trước khi làm bài!");
+            return;
+        }
+
+        let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+        masterData.name = name;
+        masterData.className = sClass;
+        masterData.stt = stt;
+        masterData.step = 2;
+        localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+        try {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+        } catch (err) {
+            console.log("Không thể bật chế độ toàn màn hình:", err);
+        }
+
+        isExamRunning = true;
+
+        const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+        selectedQuestions = shuffled.slice(0, 2);
+
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+
+        selectedQuestions.forEach((q) => {
+            let card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `<h3 style="margin-top:0;">${q.text}</h3>`;
+            
+            q.sub.forEach(s => {
+                let subDiv = document.createElement('div');
+                subDiv.className = 'sub-question';
+                subDiv.innerHTML = `
+                    <span>${s.text}</span>
+                    <div class="options">
+                        <label><input type="radio" name="${s.id}" value="Đ"> Đúng</label>
+                        <label><input type="radio" name="${s.id}" value="S"> Sai</label>
+                    </div>
+                `;
+                card.appendChild(subDiv);
+            });
+            container.appendChild(card);
+        });
+
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'block';
+
+        let totalSeconds = 4 * 60;
+        timerInterval = setInterval(() => {
+            totalSeconds--;
+            let mins = Math.floor(totalSeconds / 60);
+            let secs = totalSeconds % 60;
+            document.getElementById('time-left').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                finishQuiz(false);
+            }
+        }, 1000);
+    }
+
+    function finishQuiz(isCheating = false) {
+        if (!isExamRunning) return;
+        isExamRunning = false;
+        clearInterval(timerInterval);
+
+        localStorage.setItem('quiz_last_submit_time', Date.now().toString());
+
+        const stt = document.getElementById('student-stt').value;
+        const name = document.getElementById('student-name').value;
+        const sClass = document.getElementById('student-class').value;
+
+        let score = 0;
+        let wrongListHTML = '';
+        let wrongCount = 0;
+
+        selectedQuestions.forEach(q => {
+            q.sub.forEach(s => {
+                const radios = document.getElementsByName(s.id);
+                let userAns = "Chưa chọn";
+                for (const r of radios) {
+                    if (r.checked) {
+                        userAns = r.value;
+                        break;
+                    }
+                }
+
+                if (!isCheating && userAns === q.ans[s.id]) {
+                    score += 0.25;
+                } else {
+                    wrongCount++;
+                    const correctText = q.ans[s.id] === 'Đ' ? 'Đúng' : 'Sai';
+                    const userText = userAns === 'Chưa chọn' ? 'Chưa chọn' : (userAns === 'Đ' ? 'Đúng' : 'Sai');
+                    
+                    wrongListHTML += `
+                        <div class="wrong-item">
+                            <div class="wrong-item-header">${q.text.split(':')[0]} - Ý: ${s.text}</div>
+                            <div class="wrong-item-details">
+                                ❌ Bạn chọn: <strong style="color: #c0392b;">${userText}</strong> | 
+                                 Đáp án chính xác: <strong style="color: #27ae60;">${correctText}</strong>
+                            </div>
+                            <div class="wrong-item-exp">
+                                💡 <strong>Giải thích:</strong> ${q.explain[s.id]}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        document.getElementById('out-stt').innerText = stt;
+        document.getElementById('out-name').innerText = name;
+        document.getElementById('out-class').innerText = sClass;
+        document.getElementById('out-score').innerText = score.toFixed(2);
+
+        // Lưu điểm phần 2 và chuyển sang phần 3
+        let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+        masterData.p2 = score;
+        masterData.step = 3;
+        localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+        setTimeout(() => {
+            const lockScreen = document.getElementById('lock-screen');
+            if (lockScreen && !document.getElementById('btn-goto-p3')) {
+                const div = document.createElement('div');
+                div.innerHTML = `<button id="btn-goto-p3" onclick="window.location.href='3.html'" style="background-color:#2563eb; color:white; padding:14px; font-size:1.1rem; font-weight:bold; border:none; border-radius:6px; cursor:pointer; width:100%; margin-top: 25px; box-shadow: 0 4px 10px rgba(37,99,235,0.3);">👉 BẤM VÀO ĐÂY ĐỂ TIẾP TỤC LÀM PHẦN 3 (TỰ LUẬN AI)</button>`;
+                lockScreen.appendChild(div);
+            }
+        }, 100);
+
+        const wrongAnswersContainer = document.getElementById('wrong-answers-list');
+        if (isCheating) {
+            document.getElementById('cheat-warning').style.display = 'block';
+            wrongAnswersContainer.innerHTML = `<p style="color: #7f8c8d;">Hệ thống không hiển thị chi tiết câu sai do bài thi bị hủy vì gian lận.</p>`;
+        } else if (wrongCount === 0) {
+            wrongAnswersContainer.innerHTML = `<div style="color: #27ae60; font-weight: bold; font-size: 18px;">🎉 Xuất sắc! Bạn đã trả lời chính xác tất cả các câu hỏi.</div>`;
+        } else {
+            wrongAnswersContainer.innerHTML = wrongListHTML;
+        }
+
+        document.getElementById('cooldown-notice').innerText = "Hệ thống đã khóa bài thi. Bạn có thể làm lại bài thi (với đề mới ngẫu nhiên) sau 20 phút nữa.";
+        document.getElementById('lock-screen').style.display = 'block';
+
+        try {
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        } catch (e) {}
+        
+        checkCooldown();
+    }
+
+    // Chống gian lận
+    window.addEventListener('keydown', function (e) {
+        if (!isExamRunning) return;
+        if (
+            e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) || 
+            (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's'))
+        ) {
+            e.preventDefault();
+            finishQuiz(true);
+        }
+    });
+
+    window.addEventListener('contextmenu', function (e) {
+        if (isExamRunning) {
+            e.preventDefault();
+            finishQuiz(true);
+        }
+    });
+
+    let threshold = 160;
+    window.addEventListener('resize', function() {
+        if (!isExamRunning) return;
+        if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
+            finishQuiz(true);
+        }
+    });
+
+    document.addEventListener('fullscreenchange', function() {
+        if (isExamRunning && !document.fullscreenElement) {
+            finishQuiz(true);
+        }
+    });
+</script>
+
+</body>
+</html>

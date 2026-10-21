@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra Tin học 11 - Bài 5, 6, 7, 8</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; user-select: none; }
+        header { background-color: #2563eb; color: white; padding: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.25rem; text-transform: uppercase; margin-bottom: 4px; }
+        header p { font-size: 0.85rem; opacity: 0.9; }
+        main { flex-grow: 1; max-width: 800px; width: 100%; margin: 20px auto; padding: 0 16px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); padding: 24px; position: relative; margin-bottom: 20px; }
+        .text-center { text-align: center; }
+        .text-red { color: #dc2626; font-weight: 600; font-size: 0.9rem; margin-top: 8px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #475569; }
+        input[type="text"], input[type="number"], input[type="password"] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-blue { background-color: #2563eb; color: white; }
+        .btn-blue:hover { background-color: #1d4ed8; }
+        .btn-amber { background-color: #d97706; color: white; }
+        .btn-amber:hover { background-color: #b45309; }
+        .btn-slate { background-color: #e2e8f0; color: #334155; }
+        .btn-slate:hover { background-color: #cbd5e1; }
+        .hidden { display: none !important; }
+        
+        /* Quiz Layout */
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
+        .timer-box { background: #eff6ff; color: #1d4ed8; padding: 6px 14px; border-radius: 9999px; font-weight: bold; font-size: 0.9rem; }
+        .palette { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px; max-height: 120px; overflow-y: auto; }
+        .palette-btn { width: 34px; height: 34px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #cbd5e1; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .palette-btn.current { border: 2px solid #2563eb; background: #dbeafe; color: #1e40af; }
+        .palette-btn.answered { background: #2563eb; color: white; border-color: #2563eb; }
+        .question-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+        .option-btn { width: 100%; text-align: left; padding: 14px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; font-size: 1rem; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 12px; }
+        .option-btn:hover { border-color: #93c5fd; background: #f8fafc; }
+        .option-btn.selected { border-color: #2563eb; background: #eff6ff; color: #1e40af; font-weight: 600; }
+        .option-badge { width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0; }
+        .option-btn.selected .option-badge { background: #2563eb; color: white; }
+        
+        .nav-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; gap: 10px; }
+        
+        /* Result Review */
+        .review-item { padding: 16px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #cbd5e1; text-align: left; }
+        .review-item.correct { background-color: #ecfdf5; border-color: #a7f3d0; }
+        .review-item.incorrect { background-color: #fef2f2; border-color: #fecaca; }
+        .explanation { margin-top: 10px; padding: 10px; background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 0 6px 6px 0; font-size: 0.85rem; color: #1e3a8a; }
+        
+        /* Big Badge */
+        #result-badge { position: fixed; top: 10px; right: 20px; z-index: 9999; font-size: 100px; font-weight: 900; color: #dc2626; pointer-events: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); line-height: 1; }
+        
+        footer { background: #e2e8f0; color: #475569; padding: 12px; text-align: center; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div id="result-badge" class="hidden"><span id="res-top-stt"></span>-<span id="res-top-class"></span></div>
+
+    <header>
+        <h1>Trường THPT Nguyễn Hữu Cầu - Tin học 11</h1>
+        <p>KIỂM TRA TỔNG HỢP: BÀI 5, 6, 7, 8 (Ngân hàng 89 câu - Đề ngẫu nhiên 30 câu - Tổng điểm: 6.0)</p>
+    </header>
+
+    <main>
+        <!-- Màn hình đăng ký -->
+        <div id="reg-screen" class="card">
+            <div style="position: absolute; top: 16px; right: 16px;">
+                <button type="button" id="reset-btn" class="btn btn-amber" style="padding: 6px 12px; font-size: 0.75rem; width: auto;">🔓 Mở khóa / Reset</button>
+            </div>
+
+            <div class="text-center" style="margin-bottom: 20px; padding-top: 10px;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 6px;">Đăng Ký Thông Tin Học Sinh</h2>
+                <p class="text-red">Cảnh báo: Tuyệt đối không bấm F12, chuột phải hay thoát chế độ toàn màn hình. Vi phạm sẽ bị ghi nhận gian lận và khóa bài ngay lập tức!</p>
+            </div>
+
+            <div id="already-done-alert" class="hidden" style="background: #fffbeb; border-left: 4px solid #d97706; padding: 12px; margin-bottom: 16px; border-radius: 6px; color: #92400e; font-size: 0.9rem;">
+                <b>Thông báo:</b> Máy này vừa có học sinh làm bài gần đây. (Học sinh trước: <span id="done-student-info"></span>). Bấm nút "Mở khóa / Reset" ở góc trên nếu cần làm lại!
+            </div>
+
+            <form id="reg-form">
+                <div class="form-group">
+                    <label>Họ và tên học sinh:</label>
+                    <input type="text" id="student-name" required placeholder="Nhập đầy đủ họ và tên...">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Lớp:</label>
+                        <input type="text" id="student-class" required placeholder="Ví dụ: 11A1...">
+                    </div>
+                    <div class="form-group">
+                        <label>Số thứ tự (STT):</label>
+                        <input type="number" id="student-stt" required min="1" placeholder="Ví dụ: 15...">
+                    </div>
+                </div>
+                <button type="submit" id="start-btn" class="btn btn-blue">Bắt Đầu Làm Bài Ngay</button>
+            </form>
+        </div>
+
+        <!-- Màn hình làm bài -->
+        <div id="quiz-screen" class="card hidden">
+            <div class="quiz-header">
+                <div style="font-weight: 600;">Câu hỏi <span id="current-q-num" style="color: #2563eb; font-size: 1.2rem;">1</span> / 30</div>
+                <div class="timer-box">⏱ <span id="timer-display">15:00</span></div>
+            </div>
+
+            <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px;">Bảng câu hỏi (bấm vào số để chuyển nhanh):</div>
+            <div id="question-palette" class="palette"></div>
+
+            <div class="question-text" id="question-text">Nội dung câu hỏi...</div>
+            <div id="options-container"></div>
+
+            <div class="nav-buttons">
+                <button type="button" id="prev-btn" class="btn btn-slate" style="width: auto; padding: 10px 20px;">← Câu Trước</button>
+                <button type="button" id="submit-early-btn" class="btn btn-amber" style="width: auto; padding: 10px 20px;">Nộp Bài Sớm</button>
+                <button type="button" id="next-btn" class="btn btn-blue" style="width: auto; padding: 10px 20px;">Câu Sau →</button>
+            </div>
+        </div>
+
+        <!-- Màn hình kết quả -->
+        <div id="result-screen" class="card text-center hidden">
+            <h2 style="font-size: 1.8rem; color: #1e293b; margin-bottom: 8px;">KẾT QUẢ BÀI KIỂM TRA</h2>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto 24px auto;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: #2563eb; margin-bottom: 8px;"><span id="score-val">0</span> <span style="font-size: 1.2rem; color: #475569;">/ 6.0 điểm</span></div>
+                <p style="font-size: 0.9rem; color: #475569;">Số câu đúng: <span id="correct-count">0</span> / 30 câu (<span id="incorrect-count">0</span> câu sai)</p>
+                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid #e2e8f0; text-align: left; font-size: 0.9rem; line-height: 1.6;">
+                    <p><b>Học sinh:</b> <span id="res-student-name"></span></p>
+                    <p><b>Lớp:</b> <span id="res-student-class"></span></p>
+                    <p><b>STT:</b> <span id="res-student-stt"></span></p>
+                    <p><b>Trạng thái:</b> <span id="res-status" style="color: #16a34a; font-weight: 600;">Đã hoàn thành</span></p>
+                </div>
+            </div>
+
+            <h3 style="text-align: left; margin-bottom: 16px; font-size: 1.2rem;">Xem Lại Chi Tiết Đáp Án & Khắc Phục Lỗi Sai</h3>
+            <div id="review-list"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Trường THPT Nguyễn Hữu Cầu - Tin học 11</p>
+    </footer>
+
+    <script>
+        function textToBinary(text) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                let bin = text.charCodeAt(i).toString(2);
+                result += '0'.repeat(8 - bin.length) + bin;
+            }
+            return result;
+        }
+
+        const resetBinaryKey = "010000000100001101001111010011010101010101000001010101000100100001010101001100010011001200110011";
+
+        // NGÂN HÀNG CÂU HỎI MỚI (BÀI 5, 6, 7, 8 - TIN HỌC 11) GỒM 89 CÂU
+        const questionBank = [
+            // --- BÀI 5: KẾT NỐI MÁY TÍNH VỚI CÁC THIẾT BỊ SỐ ---
+            { q: "Các thiết bị vào ra là?", options: ["Nhóm thiết bị chứa dữ liệu tạm thời", "Nhóm thiết bị chứa các dữ liệu lâu dài", "Nhóm các thiết bị ngoại vi đa dạng và phong phú nhất của máy tính", "Cả ba đáp án trên đều đúng"], correct: 2, exp: "Các thiết bị vào ra là nhóm các thiết bị ngoại vi đa dạng và phong phú nhất của máy tính." },
+            { q: "Các thiết bị vào cho phép?", options: ["Chuyển thông tin từ máy tính ra ngoài", "Nhập dữ liệu vào máy tính", "Trao đổi thông tin hai chiều", "Cả ba đáp án trên đều sai"], correct: 1, exp: "Các thiết bị vào cho phép nhập dữ liệu vào máy tính." },
+            { q: "Các thiết bị ra là?", options: ["Chuyển thông tin từ máy tính ra ngoài", "Nhập dữ liệu vào máy tính", "Trao đổi thông tin hai chiều", "Cả ba đáp án trên đều sai"], correct: 0, exp: "Các thiết bị ra cho phép chuyển thông tin từ máy tính ra ngoài." },
+            { q: "Đáp án nào dưới đây là thiết bị vào?", options: ["Bàn phím", "Chuột", "Máy đọc mã vạch", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Bàn phím, chuột và máy đọc mã vạch đều là thiết bị vào." },
+            { q: "Đâu là thiết bị ra?", options: ["Màn hình", "Máy in", "Máy chiếu", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Màn hình, máy in và máy chiếu đều là thiết bị ra." },
+            { q: "Đâu vừa là thiết bị vào vừa là thiết bị ra?", options: ["Máy in", "Máy quét ảnh", "USB", "Máy chiếu"], correct: 2, exp: "USB (ổ đĩa flash) vừa cho phép đọc dữ liệu (vào) vừa ghi dữ liệu (ra)." },
+            { q: "Bàn phím là?", options: ["Thiết bị ra phổ biến", "Thiết bị thông dụng nhất để nhập dữ liệu", "Thiết bị chỉ định đối tượng làm việc trên màn hình", "Đáp án khác"], correct: 1, exp: "Bàn phím là thiết bị thông dụng nhất để nhập dữ liệu." },
+            { q: "Chuột là?", options: ["Thiết bị thông dụng nhất để nhập dữ liệu", "Thiết bị ra phổ biến", "Thiết bị chỉ định đối tượng làm việc trên màn hình", "Đáp án khác"], correct: 2, exp: "Chuột là thiết bị chỉ định đối tượng làm việc trên màn hình." },
+            { q: "Thông số quan trọng nhất của chuột là?", options: ["Phương thức kết nối", "Độ phân giải", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 1, exp: "Độ phân giải là thông số quan trọng nhất của chuột." },
+            { q: "Tốc độ của chuột được thể hiện bằng?", options: ["Tỉ lệ khoảng cách con trỏ màn hình di chuyển được so với khoảng cách di chuyển của chuột trên mặt bàn", "Khoảng cách di chuyển được của chuột trên màn hình", "Tốc độ di chuyển trên giây của chuột trên mặt bàn", "Đáp án khác"], correct: 0, exp: "Tốc độ chuột thể hiện tỉ lệ khoảng cách con trỏ màn hình di chuyển được so với khoảng cách di chuyển của chuột trên mặt bàn." },
+            { q: "Thiết bị ra phổ biến nhất là?", options: ["Máy in", "Loa", "Màn hình", "Máy chiếu"], correct: 2, exp: "Màn hình là thiết bị ra phổ biến nhất." },
+            { q: "Loại màn hình nào sử dụng công nghệ đèn chân không?", options: ["LCD", "LED", "CRT", "plasma"], correct: 2, exp: "CRT là loại màn hình sử dụng công nghệ đèn chân không (Cathode Ray Tube)." },
+            { q: "Độ phân giải màn hình thể hiện bằng?", options: ["Số điểm ảnh theo chiều ngang và chiều dọc của màn hình", "Độ dài đường chéo trên màn hình", "Hình ảnh trên màn hình được tạo liên tục", "Khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh"], correct: 0, exp: "Độ phân giải màn hình thể hiện số điểm ảnh theo chiều ngang và chiều dọc." },
+            { q: "Tần số quét là?", options: ["Số điểm ảnh theo chiều ngang và chiều dọc của màn hình", "Độ dài đường chéo trên màn hình", "Hình ảnh trên màn hình được tạo liên tục", "Khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh"], correct: 2, exp: "Tần số quét là số hình ảnh trên màn hình được tạo liên tục trong một giây." },
+            { q: "Thời gian phản hồi là?", options: ["Số điểm ảnh theo chiều ngang và chiều dọc của màn hình", "Độ dài đường chéo trên màn hình", "Hình ảnh trên màn hình được tạo liên tục", "Khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh"], correct: 3, exp: "Thời gian phản hồi là khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh." },
+            { q: "Kích thước của màn hình được đo bằng?", options: ["Số điểm ảnh theo chiều ngang và chiều dọc của màn hình", "Độ dài đường chéo trên màn hình", "Hình ảnh trên màn hình được tạo liên tục", "Khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh"], correct: 1, exp: "Kích thước màn hình được đo bằng độ dài đường chéo trên màn hình (đơn vị inch)." },
+            { q: "Máy in kim dùng?", options: ["Một hàng kim gõ vào băng mực để lại vết trên giấy", "Dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt của một trống tĩnh điện tương tự với hình cần in", "Phun các hạt mực màu nước siêu nhỏ để tạo ảnh", "In trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen"], correct: 0, exp: "Máy in kim dùng một hàng kim gõ vào băng mực để lại vết trên giấy." },
+            { q: "Máy in laser dùng?", options: ["Một hàng kim gõ vào băng mực để lại vết trên giấy", "Dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt của một trống tĩnh điện tương tự với hình cần in", "Phun các hạt mực màu nước siêu nhỏ để tạo ảnh", "In trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen"], correct: 1, exp: "Máy in laser dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt trống tĩnh điện." },
+            { q: "Máy in phun dùng?", options: ["Một hàng kim gõ vào băng mực để lại vết trên giấy", "Dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt của một trống tĩnh điện tương tự với hình cần in", "Phun các hạt mực màu nước siêu nhỏ để tạo ảnh", "In trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen"], correct: 2, exp: "Máy in phun dùng các hạt mực màu nước siêu nhỏ phun để tạo ảnh." },
+            { q: "Máy in nhiệt in như thế nào?", options: ["Một hàng kim gõ vào băng mực để lại vết trên giấy", "Dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt của một trống tĩnh điện tương tự với hình cần in", "Phun các hạt mực màu nước siêu nhỏ để tạo ảnh", "In trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen"], correct: 3, exp: "Máy in nhiệt in trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen." },
+            { q: "Có thể kết nối với máy in bằng?", options: ["Cáp", "Mạng có dây", "Mạng không dây", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Có thể kết nối máy in bằng cáp, mạng có dây hoặc mạng không dây." },
+            { q: "Cổng kết nối nào dùng để truyền hình ảnh?", options: ["HDMI", "VGA", "USB", "Mạng"], correct: 1, exp: "Cổng VGA chuyên dùng để truyền tín hiệu hình ảnh." },
+            { q: "Cổng kết nối nào có thể truyền đồng thời cả âm thanh và hình ảnh?", options: ["VGA", "USB", "Mạng", "HDMI"], correct: 3, exp: "Cổng HDMI truyền tải đồng thời cả hình ảnh và âm thanh chất lượng cao." },
+            { q: "Trước khi kết nối thì máy tính hay điện thoại thông minh cần phải", options: ["Mở cổng kết nối", "Đóng cổng kết nối", "Ghép đôi với thiết bị đó", "Đáp án khác"], correct: 2, exp: "Trước khi kết nối thiết bị không dây (như bluetooth), cần thực hiện ghép đôi với thiết bị đó." },
+            { q: "Ghép đôi với thiết bị trước khi kết nối để?", options: ["Có môi trường trung gian kết nối", "Dễ dàng kết nối", "Trao đổi tham số kết nối", "Đáp án khác"], correct: 2, exp: "Ghép đôi giúp trao đổi tham số kết nối giữa các thiết bị." },
+
+            // --- BÀI 6: LƯU TRỮ VÀ CHIA SẺ TỆP TIN TRÊN INTERNET ---
+            { q: "Internet đã khắc phục những rào cản nào của các tài nguyên máy tính?", options: ["Dung lượng đĩa cứng", "Dung lượng thiết bị nhớ ngoài", "Dữ liệu bị hạn chế", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Internet khắc phục toàn bộ các rào cản về dung lượng thiết bị nhớ cũng như giới hạn dữ liệu." },
+            { q: "Các nhà cung cấp dịch vụ lưu trữ thông tin, dữ liệu ngày nay là?", options: ["Google", "Microsoft", "Apple", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Google, Microsoft và Apple đều là các nhà cung cấp dịch vụ lưu trữ lớn." },
+            { q: "Khi đăng kí sử dụng dịch vụ lưu trữ thông tin, dữ liệu trực tuyến thì người dùng sẽ được?", options: ["Cung cấp các dịch vụ xử lý dữ liệu", "Cung cấp phần mềm chỉnh sửa dữ liệu trực tuyến", "Cung cấp một không gian nhớ trực tuyến", "Tạo mới và quản lý thư mục"], correct: 2, exp: "Người dùng sẽ được cung cấp một không gian nhớ trực tuyến." },
+            { q: "Khi sử dụng các dịch vụ lưu trữ và chia sẻ tệp tin trên Internet người dùng có thể?", options: ["Tải tệp hay thư mục của mình lên ổ đĩa trực tuyến", "Tạo mới và quản lý thư mục, tệp trên ổ đĩa trực tuyến", "Chia sẻ thư mục và tệp", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Người dùng có thể thực hiện tải tệp lên, tạo quản lý thư mục và chia sẻ tệp." },
+            { q: "Khi chia sẻ thông tin trên Internet, chủ sở hữu của thư mục, tệp có thể quyết định chế độ chia sẻ nào dưới đây?", options: ["Quyền chỉ xem", "Quyền được nhận xét", "Quyền chỉnh sửa", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Chủ sở hữu có thể phân quyền chỉ xem, được nhận xét hoặc chỉnh sửa." },
+            { q: "Quyền chỉnh sửa là quyền cho phép?", options: ["Xem thư mục và tệp", "Nhận xét thư mục và tệp", "Thực hiện mọi thao tác với thư mục và tệp", "Cả ba đáp án trên đều đúng"], correct: 2, exp: "Quyền chỉnh sửa cho phép thực hiện mọi thao tác (xem, sửa, xóa, tạo mới) với thư mục và tệp." },
+            { q: "Vì sao nên lưu trữ thông tin trên internet?", options: ["Dung lượng bộ nhớ lớn", "Tính bảo mật cao, có thể tùy chỉnh", "Dễ dàng tìm kiếm", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Lưu trữ trên Internet có dung lượng bộ nhớ lớn, bảo mật cao và dễ dàng tìm kiếm, truy cập mọi lúc." },
+            { q: "Đâu là dịch vụ lưu trữ và chia sẻ thông tin trực tuyến của Google?", options: ["One Drive", "iCloud", "Dropbox", "Google Drive"], correct: 3, exp: "Google Drive là dịch vụ lưu trữ trực tuyến của Google." },
+            { q: "Sau khi chia sẻ thư mục, tệp người dùng có thể?", options: ["Xóa bỏ tệp đã chia sẻ", "Hủy bỏ hoặc thay đổi chế độ chia sẻ", "Làm mới tệp chia sẻ", "Đáp án khác"], correct: 1, exp: "Người dùng có thể hủy bỏ hoặc thay đổi chế độ chia sẻ bất kỳ lúc nào." },
+            { q: "Internet giúp khắc phục giới hạn lưu trữ bằng?", options: ["Các dịch vụ chia sẻ tệp tin trực tuyến", "Phân phối bán lẻ bộ nhớ", "Cho người dùng thuê bộ nhớ", "Bắt người dùng mua phần mềm thứ 3"], correct: 0, exp: "Internet khắc phục giới hạn lưu trữ bằng các dịch vụ chia sẻ tệp tin trực tuyến." },
+            { q: "Người dùng đăng ký sử dụng dịch vụ và được cấp một không gian lưu trữ trực tuyến gọi là?", options: ["Cầu kết nối", "Nhà lưu trữ", "Đĩa trực tuyến", "Đáp án khác"], correct: 2, exp: "Không gian lưu trữ trực tuyến được gọi là đĩa trực tuyến (ổ đĩa trực tuyến)." },
+            { q: "Để có không gian lưu trữ trên internet người dùng cần phải có?", options: ["Tài khoản nơi lưu trữ đó", "Bộ xuất tài liệu ra ổ cứng", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 0, exp: "Người dùng cần có tài khoản tại nhà cung cấp dịch vụ lưu trữ đó." },
+            { q: "Tải tệp lên ổ đĩa trực tuyến cho người dùng....?", options: ["Xóa các tệp và file trong máy tính mình đi", "Tải các tệp hay thư mục từ máy tính của mình lên ổ đĩa trực tuyến để lưu trữ và sử dụng", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 1, exp: "Tải tệp lên giúp đưa các tệp từ máy tính lên ổ đĩa trực tuyến để lưu trữ và sử dụng." },
+            { q: "Các không gian lưu trữ trên internet có giới hạn dung lượng hay không?", options: ["Không, nó là vô hạn", "Không kết luận được", "Không, vì không gian thì không có dung lượng", "Có"], correct: 3, exp: "Các không gian lưu trữ trực tuyến đều có giới hạn dung lượng tùy theo gói dịch vụ." },
+            { q: "Ưu điểm của việc lưu trữ thông tin trực tuyến là?", options: ["Cho phép chia sẻ thư mục, tệp cho người dùng khác", "Không cho phép chia sẻ thư mục, tệp cho người dùng khác", "Bán được thông tin cho nhau để kiếm tiền", "Thích vào thư mục của ai cũng được"], correct: 0, exp: "Ưu điểm lớn là cho phép dễ dàng chia sẻ tài liệu cho người dùng khác." },
+            { q: "Người dùng có thể xem và nhận xét là quyền?", options: ["Chỉ xem", "Chỉnh sửa", "Được nhận xét", "Đáp án khác"], correct: 2, exp: "Quyền được nhận xét (hoặc quyền bình luận/comment)." },
+            { q: "Người dùng có thể xem là quyền?", options: ["Chỉ xem", "Chỉnh sửa", "Được nhận xét", "Đáp án khác"], correct: 0, exp: "Quyền chỉ xem (Viewer)." },
+            { q: "Người dùng có thể xem, nhận xét và thực hiện mọi thao tác với thư mục và tệp là quyền?", options: ["Chỉ xem", "Chỉnh sửa", "Được nhận xét", "Đáp án khác"], correct: 1, exp: "Quyền chỉnh sửa (Editor)." },
+            { q: "Trong quyền được chỉnh sửa thì người dùng có thể?", options: ["Chỉnh sửa thư mục", "Xóa thư mục", "Tạo mới thư mục", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Quyền chỉnh sửa cho phép thực hiện chỉnh sửa, xóa và tạo mới thư mục." },
+            { q: "Khi nào thì người dùng được cung cấp một ổ đĩa trực tuyến?", options: ["Cài đặt hệ điều hành mới", "Mua các phần mềm nguồn mở", "Sử dụng dịch vụ lưu trữ thư mục và tệp trực tuyến", "Cả ba đáp án trên đều sai"], correct: 2, exp: "Người dùng được cấp ổ đĩa trực tuyến khi sử dụng dịch vụ lưu trữ thư mục và tệp trực tuyến." },
+
+            // --- BÀI 7: THỰC HÀNH TÌM KIẾM THÔNG TIN TRÊN INTERNET ---
+            { q: "Để khởi động công cụ tìm kiếm thì em cần?", options: ["Mở trình duyệt internet trên máy tính của em", "Gõ địa chỉ URL máy tìm kiếm", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 2, exp: "Em cần mở trình duyệt và gõ địa chỉ URL máy tìm kiếm." },
+            { q: "Đâu là địa chỉ URL tìm kiếm?", options: ["tech12h.com", "newocr.com", "Google.com", "Cả ba đáp án trên đều sai"], correct: 2, exp: "Google.com là một địa chỉ URL máy tìm kiếm phổ biến." },
+            { q: "Nếu kết quả tìm kiếm chưa được như ý muốn của em thì?", options: ["Em sử dụng máy tìm kiếm khác", "Em sử dụng trình duyệt khác", "Em quay lại nhập từ khóa khác", "Đáp án khác"], correct: 2, exp: "Em nên quay lại nhập từ khóa khác phù hợp hơn." },
+            { q: "Để thực hiện tìm kiếm bằng tiếng nói thì em phải tìm kiếm?", options: ["Bằng từ khóa nhập từ bàn phím", "Trình duyệt bằng tiếng nói", "Bằng từ khóa nhập bằng tiếng nói", "Cả ba đáp án trên đều đúng"], correct: 2, exp: "Tìm kiếm bằng tiếng nói thực hiện bằng từ khóa nhập bằng tiếng nói." },
+            { q: "Sau khi đọc từ khóa tìm kiếm thì em nên?", options: ["Kiểm tra từ khóa sau khi nhập từ bàn phím đã khớp hay chưa", "Kiểm tra kết quả tìm kiếm", "Kiểm tra từ khóa được tự động điền sau khi đọc đã khớp hay chưa", "Đáp án khác"], correct: 2, exp: "Kiểm tra từ khóa được tự động điền sau khi đọc đã khớp hay chưa." },
+            { q: "Để thực hiện tìm kiếm bằng tiếng nói thì cần có?", options: ["Bàn phím", "Con chuột", "Micro", "Loa"], correct: 2, exp: "Cần có thiết bị micro để thu âm thanh giọng nói." },
+            { q: "Khi tìm kiếm em có thể nhận được kết quả dưới dạng nào dưới đây?", options: ["Tin tức", "Hình ảnh", "Video", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Kết quả tìm kiếm có thể dưới dạng tin tức, hình ảnh, video..." },
+            { q: "Để giúp nâng cao hiệu quả tìm kiếm thông tin em có thể?", options: ["Tìm kiếm thông tin dưới dạng hình ảnh", "Tìm kiếm thông tin dưới dạng tin tức", "Tìm kiếm thông tin dưới dạng video", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Lựa chọn các dạng kết quả phù hợp giúp nâng cao hiệu quả tìm kiếm." },
+            { q: "Để tìm kiếm thông tin dưới các dạng khác nhau thì em cần?", options: ["Sử dụng hình ảnh để tìm kiếm", "Chọn dạng phân loại kết quả tìm kiếm", "Sử dụng video để tìm kiếm", "Đáp án khác"], correct: 1, exp: "Em cần chọn dạng phân loại kết quả tìm kiếm trên công cụ tìm kiếm." },
+            { q: "Khi tìm kiếm thông tin tuyển sinh của một trường đại học thì em nên yêu cầu tìm dưới dạng nào dưới đây?", options: ["Tệp .pdf", "Hình ảnh", "Bài báo", "Tin tức"], correct: 3, exp: "Thông tin tuyển sinh thường được tìm kiếm dưới dạng tin tức hoặc thông báo chính thức." },
+            { q: "Khi muốn tìm kiếm ảnh về hoa hồng thì em nên chọn tìm kiếm thông tin dạng?", options: ["Bài viết", "Tin tức", "Hình ảnh", "Đáp án khác"], correct: 2, exp: "Khi tìm ảnh nên chọn dạng Hình ảnh (Images)." },
+            { q: "Để tìm kiếm thông tin dưới dạng tệp tin pdf thì em cần?", options: ["Nhập từ khóa tìm kiếm và bổ sung cụm từ filetype.docx", "Nhập từ khóa tìm kiếm và bổ sung cụm từ filetype.jpg", "Nhập từ khóa tìm kiếm và bổ sung cụm từ filetype:pdf", "Đáp án khác"], correct: 2, exp: "Bổ sung cụm từ filetype:pdf để tìm kiếm file định dạng PDF." },
+            { q: "Để thu hẹp phạm vi tìm kiếm thì?", options: ["Đặt từ khóa cần tìm trong dấu nháy kép", "Đặt từ khóa trong dấu ngoặc đơn", "Đặt từ khóa trong dấu ngoặc vuông", "Rút gọn từ khóa"], correct: 0, exp: "Đặt cụm từ khóa trong dấu nháy kép giúp tìm chính xác cụm từ đó và thu hẹp phạm vi tìm kiếm." },
+            { q: "Đặt từ khóa cần tìm trong dấu nháy kép có tác dụng?", options: ["Thu hẹp phạm vi tìm kiếm", "Cho kết quả tìm kiếm chính xác hơn", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 2, exp: "Vừa thu hẹp phạm vi vừa cho kết quả chính xác hơn theo đúng cụm từ." },
+            { q: "Xây dựng từ khóa tìm kiếm làm?", options: ["Tăng độ chính xác của kết quả", "Tăng hiệu quả tìm kiếm", "Tiết kiệm thời gian tìm kiếm", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Xây dựng từ khóa tốt giúp tăng độ chính xác, tăng hiệu quả và tiết kiệm thời gian." },
+            { q: "Chọn đáp án sai?", options: ["Người không biết cách tìm kiếm tài liệu đúng sẽ không tìm kiếm được tài liệu nhanh và chính xác", "Người biết cách tìm kiếm sẽ tìm được rất nhanh và chính xác", "Người không biết xây dựng từ khóa tìm kiếm sẽ tìm kiếm nhanh hơn", "Ngày nay, tất cả mọi thông tin đều có thể tìm thấy trên Internet"], correct: 2, exp: "Phát biểu 'Người không biết xây dựng từ khóa tìm kiếm sẽ tìm kiếm nhanh hơn' là phát biểu sai." },
+            { q: "Nguyên nhân dẫn đến tìm kiếm thông tin chậm, thiếu chính xác là?", options: ["Từ khóa tìm kiếm chưa đầy đủ", "Cách tìm kiếm tài liệu không đúng", "Chưa biết cách xây dựng từ khóa", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Do từ khóa chưa đầy đủ, cách tìm kiếm không đúng hoặc chưa biết cách xây dựng từ khóa." },
+            { q: "Đâu là cách tìm kiếm thông tin hiệu quả?", options: ["Đặt từ khóa trong dấu ngoặc đơn", "Xây dựng từ khóa phù hợp", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 1, exp: "Xây dựng từ khóa phù hợp là cách tìm kiếm thông tin hiệu quả." },
+            { q: "Khi em muốn tìm kiếm thông tin về tình hình dịch bệnh thì em nên tìm kiếm thông tin dưới dạng?", options: ["Tin tức", "Hình ảnh", "File pdf", "Đáp án khác"], correct: 0, exp: "Thông tin dịch bệnh cập nhật nên tìm kiếm dưới dạng Tin tức (News)." },
+            { q: "Khi muốn tìm hiểu thông tin về lập trình viên thì em có thể tìm kiếm thông tin bằng các từ khóa nào dưới đây?", options: ["Lập trình viên là gì", "Đặc điểm của lập trình viên", "Nhiệm vụ của lập trình viên", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Các từ khóa về định nghĩa, đặc điểm, nhiệm vụ đều giúp tìm hiểu về lập trình viên." },
+
+            // --- BÀI 8: THỰC HÀNH NÂNG CAO SỬ DỤNG THƯ ĐIỆN TỬ VÀ MẠNG XÃ HỘI ---
+            { q: "Việc sử dụng và tìm kiếm thư điện tử sẽ thuận tiện hơn nhờ?", options: ["Việc đánh dấu, phân loại thư điện tử", "Sắp xếp thư điện tử một cách hợp lý", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 2, exp: "Nhờ cả việc đánh dấu, phân loại và sắp xếp thư điện tử hợp lý." },
+            { q: "Gmail hỗ trợ việc?", options: ["Phân loại thư quan trọng", "Tự động đánh dấu thư", "Tự động xác định và đánh dấu thư thuộc loại quan trọng", "Cả ba đáp án trên đều sai"], correct: 2, exp: "Gmail tự động xác định và đánh dấu thư thuộc loại quan trọng." },
+            { q: "Gmail tự động xác định và đánh dấu thư thuộc loại quan trọng bằng?", options: ["Phần mềm đánh dấu", "Chức năng lọc thư", "Dấu quan trọng màu vàng", "Đáp án khác"], correct: 2, exp: "Gmail hiển thị dấu quan trọng màu vàng bên cạnh thư." },
+            { q: "Dựa vào đâu để Gmail tự động xác định và đánh dấu thư thuộc loại quan trọng?", options: ["Người gửi và tần suất gửi cho một người", "Thư điện tử được mở và trả lời", "Từ khóa có trong thư điện tử thường xuyên đọc", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Dựa vào người gửi, tần suất gửi, thư được mở/trả lời và từ khóa thường đọc." },
+            { q: "Để biết được lí do thư đó được đánh dấu là quan trọng ta vào?", options: ["Vào hộp thư nháp, di chuyển con trỏ chuột vào dấu quan trọng màu vàng", "Vào hộp thư đến, di chuyển con trỏ chuột vào dấu quan trọng màu vàng", "Vào hộp thư rác, di chuyển con trỏ chuột vào dấu quan trọng màu vàng", "Đáp án khác"], correct: 1, exp: "Vào hộp thư đến, di chuyển con trỏ chuột vào dấu quan trọng màu vàng." },
+            { q: "Thực hiện tìm kiếm từ khóa nào để hiển thị danh sách tất cả thư điện tử quan trọng?", options: ["is: early", "is: delete", "is: important", "Đáp án khác"], correct: 2, exp: "Sử dụng từ khóa 'is:important' để tìm thư quan trọng." },
+            { q: "Để sắp xếp phân loại thư trong hộp thư đến thì em sử dụng?", options: ["Dấu quan trọng", "Dấu sao", "Nhãn (Label)", "Đáp án khác"], correct: 2, exp: "Sử dụng nhãn (Label) để sắp xếp phân loại thư." },
+            { q: "Việc tìm kiếm is: important để?", options: ["Sắp xếp, phân loại thư trong hộp thư đến", "Hiển thị danh sách tất cả thư điện tử quan trọng", "Xóa các thư đến", "Đáp án khác"], correct: 1, exp: "Dùng để hiển thị danh sách tất cả thư điện tử quan trọng." },
+            { q: "Sử dụng nhãn (label) giúp?", options: ["Tiết kiệm thời gian khi tìm kiếm lại các thư", "Tránh thất lạc thông tin ở các thư cũ", "Quản lý việc nhận thư từ các địa chỉ", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Nhãn giúp tiết kiệm thời gian tìm kiếm, tránh thất lạc thông tin và quản lý việc nhận thư tốt hơn." },
+            { q: "Khi em xóa một thư thì?", options: ["Thư đó sẽ bị xóa khỏi mọi nhãn đính kèm", "Thư đó sẽ bị xóa khỏi mọi nhãn đính kèm cũng như trong hộp thư đến", "Thư đó sẽ bị xóa khỏi hộp thư đến", "Tránh thất lạc thông tin ở các thư cũ"], correct: 1, exp: "Thư đó sẽ bị xóa khỏi mọi nhãn đính kèm cũng như trong hộp thư đến." },
+            { q: "Để tạo nhãn thì em cần?", options: ["Truy cập Gmail", "Nháy chuột vào Danh sách mở rộng ở bên trái cửa sổ", "Nháy chuột vào Tạo nhãn mới", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Cần truy cập Gmail, nháy chuột vào Danh sách mở rộng và chọn 'Tạo nhãn mới'." },
+            { q: "Để gán nhãn cho các thư trong hộp thư đến thì?", options: ["Em chọn thư cần gán nhãn", "Nháy chuột mở danh sách nhãn", "Chọn nhãn muốn gán", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Chọn thư cần gán, mở danh sách nhãn và chọn nhãn muốn gán." },
+            { q: "Fanpage là trang web trên?", options: ["Google", "Coccoc", "Facebook", "Cả ba đáp án trên đều sai"], correct: 2, exp: "Fanpage là trang cộng đồng/doanh nghiệp trên mạng xã hội Facebook." },
+            { q: "Fanpage có tác dụng?", options: ["Giúp các tổ chức, doanh nghiệp quảng bá thương hiệu", "Giúp các tổ chức, doanh nghiệp quảng bá hình ảnh", "Giúp các tổ chức, doanh nghiệp quảng bá sản phẩm", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Fanpage giúp quảng bá thương hiệu, hình ảnh và sản phẩm của tổ chức, doanh nghiệp." },
+            { q: "Em có thể thiết lập ai xem các bài viết của em trong tương lai?", options: ["Bạn bè", "Chỉ mình tôi", "Công khai", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Có thể thiết lập chế độ Bạn bè, Chỉ mình tôi hoặc Công khai." },
+            { q: "Để cài đặt quyền riêng tư trên Facebook thì em vào?", options: ["Bảng tin", "Video", "Cài đặt", "Trang cá nhân"], correct: 2, exp: "Vào mục Cài đặt (Settings) trên Facebook." },
+            { q: "Cách giúp em tìm đọc lại được những thư em đã nhận trước đây là?", options: ["Kéo xuống tìm kiếm theo thời gian hiển thị của thư trong mục hộp thư đến", "Chọn tìm kiếm và phân loại theo mốc thời gian", "Chọn tìm kiếm và phân loại theo tên người gửi và kéo xuống tìm kiếm theo thời gian", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Có thể tìm kiếm theo thời gian, phân loại mốc thời gian hoặc theo tên người gửi." },
+            { q: "Vì sao em nên dùng Đánh dấu và phân loại email bằng cách sử dụng màu sắc của biểu tượng đánh dấu hình ngôi sao?", options: ["Màu sắc của biểu tượng đánh dấu hình ngôi sao giúp cho bạn rèn luyện trí nhớ tốt hơn", "Cách sắp xếp công việc thuận tiện, nhanh hơn", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 1, exp: "Giúp sắp xếp công việc thuận tiện và nhanh chóng hơn." },
+            { q: "Phát biểu nào sau đây là đúng khi nói về thư điện tử?", options: ["Nhìn vào hộp thư điện tử, người gửi có thể biết được bức thư mình đã gửi đi người nhận đã đọc hay chưa", "Chỉ có người nhận thư mới mở được tệp đính kèm theo thư, còn người gửi sẽ không mở được tệp đính kèm khi đã gửi thư", "Trong hộp thư đến chỉ chứa thư của những người quen biết", "Nhìn vào hộp thư điện tử có thể biết thư đã đọc hay chưa"], correct: 3, exp: "Nhìn vào hộp thư điện tử có thể biết thư đã đọc hay chưa." },
+            { q: "Theo quy định của Google, trẻ vị thành niên muốn đăng kí tài khoản thư điện tử thì:", options: ["Không được phép sử dụng Gmail", "Chỉ được sử dụng tài khoản của người thân", "Cần có sự đồng ý, trợ giúp và quản lí của bố mẹ", "Cần phải cung cấp đầy đủ các thông tin về gia đình, trường học"], correct: 2, exp: "Trẻ vị thành niên cần có sự đồng ý, trợ giúp và quản lí của bố mẹ khi đăng ký tài khoản." },
+            { q: "Em và bạn em đã trao đổi thư điện tử với nhau thì cách nào sau đây là tốt nhất để biết địa chỉ thư điện tử của bạn em?", options: ["Thử một địa chỉ thư điện tử bất kì nào đó", "Tìm trong danh bạ địa chỉ của hệ thống thư điện tử", "Sử dụng máy tìm kiếm Google để tìm trên Internet", "Gọi điện thoại cho bạn để hỏi"], correct: 1, exp: "Tìm trong danh bạ địa chỉ của hệ thống thư điện tử." },
+            { q: "Thư điện tử có lợi ích gì trong việc giải quyết các công việc của em?", options: ["Sửa tài liệu", "Trao đổi thông tin qua lại với bạn bè", "Tiết kiệm thời gian và tiền bạc", "Cả ba đáp án trên đều đúng"], correct: 2, exp: "Thư điện tử giúp tiết kiệm thời gian và tiền bạc trong việc trao đổi thông tin." },
+            { q: "Khi em nhận được thư điện tử có tệp đính kèm nghi ngờ là virus từ người quen, em nên xử lí như thế nào?", options: ["Mở tệp đính kèm và lưu tệp đó vào máy tính của mình", "Trước khi mở tệp đính kèm, em tìm cách nhắn tin hoặc gửi một thư điện tử khác cho người đã gửi thư để kiểm tra có đúng người đó gửi tệp đó cho em hay không", "Mở tệp đính kèm và xóa tệp đó ngay nếu nhận thấy tệp bị nhiễm virus", "Trước khi mở tệp đính kèm, em chuyển sang máy tính khác để mở lại thư điện tử đó."], correct: 1, exp: "Trước khi mở tệp đính kèm, em tìm cách nhắn tin hoặc gửi thư khác để kiểm tra xem có đúng người đó gửi hay không." },
+            { q: "Phát biểu nào sau đây là sai:", options: ["Cần đăng xuất ra khỏi hộp thư điện tử sau khi sử dụng xong.", "Thời gian gửi thư điện tử rất ngắn gần như ngay lập tức", "Cần mở tất cả các tệp đính kèm được gửi cho bạn", "Chỉ mở tệp đính kèm từ những người bạn biết và tin tưởng."], correct: 2, exp: "Phát biểu 'Cần mở tất cả các tệp đính kèm được gửi cho bạn' là hoàn toàn sai và nguy hiểm." }
+        ];
+
+        let currentQIndex = 0;
+        let quizQuestions = [];
+        let userAnswers = {};
+        let timerSeconds = 15 * 60;
+        let timerInterval = null;
+        let studentData = {};
+        let isSubmitted = false;
+
+        // CHỐNG GIAN LẬN: Chặn chuột phải và phím tắt F12, Ctrl+Shift+I/J/C, Ctrl+U/S
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            alert("Cảnh báo: Thao tác chuột phải bị cấm trong giờ kiểm tra!");
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (
+                e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) || 
+                (e.ctrlKey && ['U', 'u', 'S', 's'].includes(e.key))
+            ) {
+                e.preventDefault();
+                alert("Cảnh báo: Phím tắt can thiệp mã nguồn bị khóa!");
+                return false;
+            }
+        });
+
+        // BẮT SỰ KIỆN GIAN LẬN THOÁT FULLSCREEN -> GHI NHẬN VÀ KẾT THÚC BÀI NGAY LẬP TỨC
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && !document.getElementById('quiz-screen').classList.contains('hidden') && !isSubmitted) {
+                alert("CẢNH BÁO: Bạn đã thoát khỏi chế độ toàn màn hình! Hệ thống ghi nhận gian lận và tự động nộp bài ngay lập tức.");
+                submitQuiz("Vi phạm quy chế: Thoát chế độ toàn màn hình");
+            }
+        });
+
+        // Check local storage on load & LẤY THÔNG TIN TỪ FILE INDEX QUA master_exam_data
+        window.addEventListener('DOMContentLoaded', () => {
+            const masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+            if (masterData && masterData.name && masterData.className && masterData.stt) {
+                document.getElementById('student-name').value = masterData.name;
+                document.getElementById('student-class').value = masterData.className;
+                document.getElementById('student-stt').value = masterData.stt;
+            }
+
+            const savedDone = localStorage.getItem('tin11_tonghop_done');
+            if (savedDone) {
+                try {
+                    const data = JSON.parse(savedDone);
+                    document.getElementById('already-done-alert').classList.remove('hidden');
+                    document.getElementById('done-student-info').innerText = `${data.name} - Lớp: ${data.className} - STT: ${data.stt}`;
+                } catch(e) {}
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            const inputVal = prompt("Nhập từ khóa bảo mật để mở khóa:");
+            if (inputVal !== null) {
+                if (textToBinary(inputVal.trim()) === resetBinaryKey) {
+                    localStorage.removeItem('tin11_tonghop_done');
+                    alert("Mở khóa thành công! Hệ thống đã được reset trạng thái.");
+                    location.reload();
+                } else {
+                    alert("Từ khóa không chính xác! Không thể mở khóa.");
+                }
+            }
+        });
+
+        document.getElementById('reg-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('student-name').value.trim();
+            const className = document.getElementById('student-class').value.trim();
+            const stt = document.getElementById('student-stt').value.trim();
+
+            if (!name || !className || !stt) {
+                alert("Vui lòng điền đầy đủ họ tên, lớp và STT!");
+                return;
+            }
+
+            studentData = { name, className, stt };
+
+            let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+            masterData.name = name;
+            masterData.className = className;
+            masterData.stt = stt;
+            masterData.step = 1;
+            localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => {
+                    console.log("Không thể bật toàn màn hình tự động:", err);
+                });
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+
+            // Lấy ngẫu nhiên 30 câu hỏi từ ngân hàng 89 câu
+            quizQuestions = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 30);
+            userAnswers = {};
+            isSubmitted = false;
+
+            document.getElementById('reg-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+
+            renderPalette();
+            loadQuestion(0);
+            startTimer();
+        });
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                let m = Math.floor(timerSeconds / 60);
+                let s = timerSeconds % 60;
+                document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Đã hết thời gian làm bài!");
+                    submitQuiz("Đã hết thời gian");
+                }
+            }, 1000);
+        }
+
+        function renderPalette() {
+            const paletteContainer = document.getElementById('question-palette');
+            paletteContainer.innerHTML = '';
+            quizQuestions.forEach((_, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'palette-btn';
+                btn.innerText = idx + 1;
+                if (idx === currentQIndex) btn.classList.add('current');
+                if (userAnswers[idx] !== undefined) btn.classList.add('answered');
+                btn.onclick = () => goToQuestion(idx);
+                paletteContainer.appendChild(btn);
+            });
+        }
+
+        function goToQuestion(idx) {
+            currentQIndex = idx;
+            loadQuestion(currentQIndex);
+            updatePaletteActive();
+        }
+
+        function updatePaletteActive() {
+            const buttons = document.querySelectorAll('.palette-btn');
+            buttons.forEach((btn, idx) => {
+                btn.classList.remove('current');
+                if (idx === currentQIndex) btn.classList.add('current');
+                if (userAnswers[idx] !== undefined) {
+                    btn.classList.add('answered');
+                } else {
+                    btn.classList.remove('answered');
+                }
+            });
+        }
+
+        function loadQuestion(idx) {
+            const q = quizQuestions[idx];
+            document.getElementById('current-q-num').innerText = idx + 1;
+            document.getElementById('question-text').innerText = `${idx + 1}. ${q.q}`;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const badges = ['A', 'B', 'C', 'D'];
+            q.options.forEach((opt, optIdx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'option-btn';
+                if (userAnswers[idx] === optIdx) {
+                    btn.classList.add('selected');
+                }
+
+                btn.innerHTML = `<div class="option-badge">${badges[optIdx]}</div> <div>${opt}</div>`;
+                btn.onclick = () => selectOption(idx, optIdx);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('prev-btn').disabled = idx === 0;
+            document.getElementById('next-btn').innerText = idx === quizQuestions.length - 1 ? 'Hoàn Thành' : 'Câu Sau →';
+        }
+
+        function selectOption(qIdx, optIdx) {
+            userAnswers[qIdx] = optIdx;
+            loadQuestion(qIdx);
+            updatePaletteActive();
+        }
+
+        document.getElementById('prev-btn').onclick = () => {
+            if (currentQIndex > 0) {
+                currentQIndex--;
+                loadQuestion(currentQIndex);
+                updatePaletteActive();
+            }
+        };
+
+        document.getElementById('next-btn').onclick = () => {
+            if (currentQIndex < quizQuestions.length - 1) {
+                currentQIndex++;
+                loadQuestion(currentQIndex);
+                updatePaletteActive();
+            } else {
+                if (confirm("Bạn có chắc chắn muốn nộp bài không?")) {
+                    submitQuiz("Đã hoàn thành");
+                }
+            }
+        };
+
+        document.getElementById('submit-early-btn').onclick = () => {
+            const answeredCount = Object.keys(userAnswers).length;
+            if (confirm(`Bạn đã trả lời ${answeredCount}/30 câu. Bạn có chắc muốn nộp bài sớm không?`)) {
+                submitQuiz("Nộp bài sớm");
+            }
+        };
+
+        function submitQuiz(statusReason = "Đã hoàn thành") {
+            if (isSubmitted) return;
+            isSubmitted = true;
+            clearInterval(timerInterval);
+
+            if (document.exitFullscreen && document.fullscreenElement) {
+                document.exitFullscreen().catch(err => {});
+            }
+
+            let correctCount = 0;
+            quizQuestions.forEach((q, idx) => {
+                if (userAnswers[idx] === q.correct) {
+                    correctCount++;
+                }
+            });
+
+            // Tổng 30 câu, mỗi câu đúng 0.2 điểm -> tối đa 6.0 điểm
+            const score = correctCount * 0.2;
+
+            let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+            masterData.p1 = score;
+            masterData.step = 2;
+            localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+            setTimeout(() => {
+                const reviewList = document.getElementById('review-list');
+                if (reviewList && !document.getElementById('btn-goto-p2')) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<button id="btn-goto-p2" onclick="window.location.href='2.html'" style="background-color:#2563eb; color:white; padding:14px; font-size:1.1rem; font-weight:bold; border:none; border-radius:8px; cursor:pointer; width:100%; margin: 20px 0; box-shadow: 0 4px 10px rgba(37,99,235,0.3);">👉 BẤM VÀO ĐÂY ĐỂ TIẾP TỤC LÀM PHẦN 2 (ĐÚNG / SAI)</button>`;
+                    reviewList.parentNode.insertBefore(div, reviewList);
+                }
+            }, 100);
+
+            localStorage.setItem('tin11_tonghop_done', JSON.stringify({
+                name: studentData.name,
+                className: studentData.className,
+                stt: studentData.stt,
+                score: score.toFixed(1),
+                status: statusReason
+            }));
+
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            document.getElementById('score-val').innerText = score.toFixed(1);
+            document.getElementById('correct-count').innerText = correctCount;
+            document.getElementById('incorrect-count').innerText = 30 - correctCount;
+            document.getElementById('res-student-name').innerText = studentData.name;
+            document.getElementById('res-student-class').innerText = studentData.className;
+            document.getElementById('res-student-stt').innerText = studentData.stt;
+            
+            const statusEl = document.getElementById('res-status');
+            statusEl.innerText = statusReason;
+            if (statusReason.includes("Vi phạm")) {
+                statusEl.style.color = "#dc2626";
+            }
+
+            const badge = document.getElementById('result-badge');
+            document.getElementById('res-top-stt').innerText = studentData.stt;
+            document.getElementById('res-top-class').innerText = studentData.className;
+            badge.classList.remove('hidden');
+
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+            const badges = ['A', 'B', 'C', 'D'];
+
+            quizQuestions.forEach((q, idx) => {
+                const userChoice = userAnswers[idx];
+                const isCorrect = userChoice === q.correct;
+                const div = document.createElement('div');
+                div.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
+
+                let html = `<div style="font-weight:600; margin-bottom:8px;">Câu ${idx + 1}: ${q.q}</div>`;
+                q.options.forEach((opt, optIdx) => {
+                    let style = "padding: 6px 10px; margin: 4px 0; border-radius: 6px; font-size: 0.9rem;";
+                    if (optIdx === q.correct) {
+                        style += " background-color: #d1fae5; color: #065f46; font-weight: bold;";
+                    } else if (optIdx === userChoice && !isCorrect) {
+                        style += " background-color: #fee2e2; color: #991b1b; text-decoration: line-through;";
+                    } else {
+                        style += " background-color: #ffffff; border: 1px solid #e2e8f0;";
+                    }
+                    html += `<div style="${style}">${badges[optIdx]}. ${opt} ${optIdx === q.correct ? ' (Đáp án đúng)' : ''} ${optIdx === userChoice && !isCorrect ? ' (Bạn chọn)' : ''}</div>`;
+                });
+
+                html += `<div class="explanation"><b>Giải thích:</b> ${q.exp}</div>`;
+                div.innerHTML = html;
+                reviewList.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>

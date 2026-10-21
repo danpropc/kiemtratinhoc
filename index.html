@@ -111,6 +111,10 @@
 
     <button type="button" class="btn-teacher-reset" onclick="openTeacherModal()">🔓 Mở Khóa / Reset</button>
 
+    
+    <button type="button" class="btn-teacher-reset" style="right:190px;background:#475569" onclick="setApiKey()">🔑 API Key</button>
+    <iframe id="exam-frame" class="hidden" allow="fullscreen; clipboard-read; clipboard-write" style="position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;z-index:9999"></iframe>
+
     <div id="start-card" class="card">
         <h1>KỲ THI GIỮA KỲ TIN HỌC 11</h1>
         <p class="subtitle">Hệ thống thi 3 phần liên tiếp (Tổng điểm: 10.0)</p>
@@ -169,7 +173,2399 @@
         </div>
     </div>
 
+    <script type="text/plain" id="tpl-1"><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra Tin học 11 - Bài 5, 6, 7, 8</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; user-select: none; }
+        header { background-color: #2563eb; color: white; padding: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.25rem; text-transform: uppercase; margin-bottom: 4px; }
+        header p { font-size: 0.85rem; opacity: 0.9; }
+        main { flex-grow: 1; max-width: 800px; width: 100%; margin: 20px auto; padding: 0 16px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); padding: 24px; position: relative; margin-bottom: 20px; }
+        .text-center { text-align: center; }
+        .text-red { color: #dc2626; font-weight: 600; font-size: 0.9rem; margin-top: 8px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: #475569; }
+        input[type="text"], input[type="number"], input[type="password"] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-blue { background-color: #2563eb; color: white; }
+        .btn-blue:hover { background-color: #1d4ed8; }
+        .btn-amber { background-color: #d97706; color: white; }
+        .btn-amber:hover { background-color: #b45309; }
+        .btn-slate { background-color: #e2e8f0; color: #334155; }
+        .btn-slate:hover { background-color: #cbd5e1; }
+        .hidden { display: none !important; }
+        
+        /* Quiz Layout */
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
+        .timer-box { background: #eff6ff; color: #1d4ed8; padding: 6px 14px; border-radius: 9999px; font-weight: bold; font-size: 0.9rem; }
+        .palette { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px; max-height: 120px; overflow-y: auto; }
+        .palette-btn { width: 34px; height: 34px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #cbd5e1; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .palette-btn.current { border: 2px solid #2563eb; background: #dbeafe; color: #1e40af; }
+        .palette-btn.answered { background: #2563eb; color: white; border-color: #2563eb; }
+        .question-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+        .option-btn { width: 100%; text-align: left; padding: 14px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; font-size: 1rem; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 12px; }
+        .option-btn:hover { border-color: #93c5fd; background: #f8fafc; }
+        .option-btn.selected { border-color: #2563eb; background: #eff6ff; color: #1e40af; font-weight: 600; }
+        .option-badge { width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; flex-shrink: 0; }
+        .option-btn.selected .option-badge { background: #2563eb; color: white; }
+        
+        .nav-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; gap: 10px; }
+        
+        /* Result Review */
+        .review-item { padding: 16px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #cbd5e1; text-align: left; }
+        .review-item.correct { background-color: #ecfdf5; border-color: #a7f3d0; }
+        .review-item.incorrect { background-color: #fef2f2; border-color: #fecaca; }
+        .explanation { margin-top: 10px; padding: 10px; background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 0 6px 6px 0; font-size: 0.85rem; color: #1e3a8a; }
+        
+        /* Big Badge */
+        #result-badge { position: fixed; top: 10px; right: 20px; z-index: 9999; font-size: 100px; font-weight: 900; color: #dc2626; pointer-events: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); line-height: 1; }
+        
+        footer { background: #e2e8f0; color: #475569; padding: 12px; text-align: center; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div id="result-badge" class="hidden"><span id="res-top-stt"></span>-<span id="res-top-class"></span></div>
+
+    <header>
+        <h1>Trường THPT Nguyễn Hữu Cầu - Tin học 11</h1>
+        <p>KIỂM TRA TỔNG HỢP: BÀI 5, 6, 7, 8 (Ngân hàng 89 câu - Đề ngẫu nhiên 30 câu - Tổng điểm: 6.0)</p>
+    </header>
+
+    <main>
+        <!-- Màn hình đăng ký -->
+        <div id="reg-screen" class="card">
+            <div style="position: absolute; top: 16px; right: 16px;">
+                <button type="button" id="reset-btn" class="btn btn-amber" style="padding: 6px 12px; font-size: 0.75rem; width: auto;">🔓 Mở khóa / Reset</button>
+            </div>
+
+            <div class="text-center" style="margin-bottom: 20px; padding-top: 10px;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 6px;">Đăng Ký Thông Tin Học Sinh</h2>
+                <p class="text-red">Cảnh báo: Tuyệt đối không bấm F12, chuột phải hay thoát chế độ toàn màn hình. Vi phạm sẽ bị ghi nhận gian lận và khóa bài ngay lập tức!</p>
+            </div>
+
+            <div id="already-done-alert" class="hidden" style="background: #fffbeb; border-left: 4px solid #d97706; padding: 12px; margin-bottom: 16px; border-radius: 6px; color: #92400e; font-size: 0.9rem;">
+                <b>Thông báo:</b> Máy này vừa có học sinh làm bài gần đây. (Học sinh trước: <span id="done-student-info"></span>). Bấm nút "Mở khóa / Reset" ở góc trên nếu cần làm lại!
+            </div>
+
+            <form id="reg-form">
+                <div class="form-group">
+                    <label>Họ và tên học sinh:</label>
+                    <input type="text" id="student-name" required placeholder="Nhập đầy đủ họ và tên...">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Lớp:</label>
+                        <input type="text" id="student-class" required placeholder="Ví dụ: 11A1...">
+                    </div>
+                    <div class="form-group">
+                        <label>Số thứ tự (STT):</label>
+                        <input type="number" id="student-stt" required min="1" placeholder="Ví dụ: 15...">
+                    </div>
+                </div>
+                <button type="submit" id="start-btn" class="btn btn-blue">Bắt Đầu Làm Bài Ngay</button>
+            </form>
+        </div>
+
+        <!-- Màn hình làm bài -->
+        <div id="quiz-screen" class="card hidden">
+            <div class="quiz-header">
+                <div style="font-weight: 600;">Câu hỏi <span id="current-q-num" style="color: #2563eb; font-size: 1.2rem;">1</span> / 30</div>
+                <div class="timer-box">⏱ <span id="timer-display">15:00</span></div>
+            </div>
+
+            <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px;">Bảng câu hỏi (bấm vào số để chuyển nhanh):</div>
+            <div id="question-palette" class="palette"></div>
+
+            <div class="question-text" id="question-text">Nội dung câu hỏi...</div>
+            <div id="options-container"></div>
+
+            <div class="nav-buttons">
+                <button type="button" id="prev-btn" class="btn btn-slate" style="width: auto; padding: 10px 20px;">← Câu Trước</button>
+                <button type="button" id="submit-early-btn" class="btn btn-amber" style="width: auto; padding: 10px 20px;">Nộp Bài Sớm</button>
+                <button type="button" id="next-btn" class="btn btn-blue" style="width: auto; padding: 10px 20px;">Câu Sau →</button>
+            </div>
+        </div>
+
+        <!-- Màn hình kết quả -->
+        <div id="result-screen" class="card text-center hidden">
+            <h2 style="font-size: 1.8rem; color: #1e293b; margin-bottom: 8px;">KẾT QUẢ BÀI KIỂM TRA</h2>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto 24px auto;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: #2563eb; margin-bottom: 8px;"><span id="score-val">0</span> <span style="font-size: 1.2rem; color: #475569;">/ 6.0 điểm</span></div>
+                <p style="font-size: 0.9rem; color: #475569;">Số câu đúng: <span id="correct-count">0</span> / 30 câu (<span id="incorrect-count">0</span> câu sai)</p>
+                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid #e2e8f0; text-align: left; font-size: 0.9rem; line-height: 1.6;">
+                    <p><b>Học sinh:</b> <span id="res-student-name"></span></p>
+                    <p><b>Lớp:</b> <span id="res-student-class"></span></p>
+                    <p><b>STT:</b> <span id="res-student-stt"></span></p>
+                    <p><b>Trạng thái:</b> <span id="res-status" style="color: #16a34a; font-weight: 600;">Đã hoàn thành</span></p>
+                </div>
+            </div>
+
+            <h3 style="text-align: left; margin-bottom: 16px; font-size: 1.2rem;">Xem Lại Chi Tiết Đáp Án & Khắc Phục Lỗi Sai</h3>
+            <div id="review-list"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Trường THPT Nguyễn Hữu Cầu - Tin học 11</p>
+    </footer>
+
     <script>
+        function textToBinary(text) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                let bin = text.charCodeAt(i).toString(2);
+                result += '0'.repeat(8 - bin.length) + bin;
+            }
+            return result;
+        }
+
+        const resetBinaryKey = "010000000100001101001111010011010101010101000001010101000100100001010101001100010011001200110011";
+
+        // NGÂN HÀNG CÂU HỎI MỚI (BÀI 5, 6, 7, 8 - TIN HỌC 11) GỒM 89 CÂU
+        const questionBank = [
+            // --- BÀI 5: KẾT NỐI MÁY TÍNH VỚI CÁC THIẾT BỊ SỐ ---
+            { q: "Các thiết bị vào ra là?", options: ["Nhóm thiết bị chứa dữ liệu tạm thời", "Nhóm thiết bị chứa các dữ liệu lâu dài", "Nhóm các thiết bị ngoại vi đa dạng và phong phú nhất của máy tính", "Cả ba đáp án trên đều đúng"], correct: 2, exp: "Các thiết bị vào ra là nhóm các thiết bị ngoại vi đa dạng và phong phú nhất của máy tính." },
+            { q: "Các thiết bị vào cho phép?", options: ["Chuyển thông tin từ máy tính ra ngoài", "Nhập dữ liệu vào máy tính", "Trao đổi thông tin hai chiều", "Cả ba đáp án trên đều sai"], correct: 1, exp: "Các thiết bị vào cho phép nhập dữ liệu vào máy tính." },
+            { q: "Các thiết bị ra là?", options: ["Chuyển thông tin từ máy tính ra ngoài", "Nhập dữ liệu vào máy tính", "Trao đổi thông tin hai chiều", "Cả ba đáp án trên đều sai"], correct: 0, exp: "Các thiết bị ra cho phép chuyển thông tin từ máy tính ra ngoài." },
+            { q: "Đáp án nào dưới đây là thiết bị vào?", options: ["Bàn phím", "Chuột", "Máy đọc mã vạch", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Bàn phím, chuột và máy đọc mã vạch đều là thiết bị vào." },
+            { q: "Đâu là thiết bị ra?", options: ["Màn hình", "Máy in", "Máy chiếu", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Màn hình, máy in và máy chiếu đều là thiết bị ra." },
+            { q: "Đâu vừa là thiết bị vào vừa là thiết bị ra?", options: ["Máy in", "Máy quét ảnh", "USB", "Máy chiếu"], correct: 2, exp: "USB (ổ đĩa flash) vừa cho phép đọc dữ liệu (vào) vừa ghi dữ liệu (ra)." },
+            { q: "Bàn phím là?", options: ["Thiết bị ra phổ biến", "Thiết bị thông dụng nhất để nhập dữ liệu", "Thiết bị chỉ định đối tượng làm việc trên màn hình", "Đáp án khác"], correct: 1, exp: "Bàn phím là thiết bị thông dụng nhất để nhập dữ liệu." },
+            { q: "Chuột là?", options: ["Thiết bị thông dụng nhất để nhập dữ liệu", "Thiết bị ra phổ biến", "Thiết bị chỉ định đối tượng làm việc trên màn hình", "Đáp án khác"], correct: 2, exp: "Chuột là thiết bị chỉ định đối tượng làm việc trên màn hình." },
+            { q: "Thông số quan trọng nhất của chuột là?", options: ["Phương thức kết nối", "Độ phân giải", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 1, exp: "Độ phân giải là thông số quan trọng nhất của chuột." },
+            { q: "Tốc độ của chuột được thể hiện bằng?", options: ["Tỉ lệ khoảng cách con trỏ màn hình di chuyển được so với khoảng cách di chuyển của chuột trên mặt bàn", "Khoảng cách di chuyển được của chuột trên màn hình", "Tốc độ di chuyển trên giây của chuột trên mặt bàn", "Đáp án khác"], correct: 0, exp: "Tốc độ chuột thể hiện tỉ lệ khoảng cách con trỏ màn hình di chuyển được so với khoảng cách di chuyển của chuột trên mặt bàn." },
+            { q: "Thiết bị ra phổ biến nhất là?", options: ["Máy in", "Loa", "Màn hình", "Máy chiếu"], correct: 2, exp: "Màn hình là thiết bị ra phổ biến nhất." },
+            { q: "Loại màn hình nào sử dụng công nghệ đèn chân không?", options: ["LCD", "LED", "CRT", "plasma"], correct: 2, exp: "CRT là loại màn hình sử dụng công nghệ đèn chân không (Cathode Ray Tube)." },
+            { q: "Độ phân giải màn hình thể hiện bằng?", options: ["Số điểm ảnh theo chiều ngang và chiều dọc của màn hình", "Độ dài đường chéo trên màn hình", "Hình ảnh trên màn hình được tạo liên tục", "Khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh"], correct: 0, exp: "Độ phân giải màn hình thể hiện số điểm ảnh theo chiều ngang và chiều dọc." },
+            { q: "Tần số quét là?", options: ["Số điểm ảnh theo chiều ngang và chiều dọc của màn hình", "Độ dài đường chéo trên màn hình", "Hình ảnh trên màn hình được tạo liên tục", "Khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh"], correct: 2, exp: "Tần số quét là số hình ảnh trên màn hình được tạo liên tục trong một giây." },
+            { q: "Thời gian phản hồi là?", options: ["Số điểm ảnh theo chiều ngang và chiều dọc của màn hình", "Độ dài đường chéo trên màn hình", "Hình ảnh trên màn hình được tạo liên tục", "Khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh"], correct: 3, exp: "Thời gian phản hồi là khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh." },
+            { q: "Kích thước của màn hình được đo bằng?", options: ["Số điểm ảnh theo chiều ngang và chiều dọc của màn hình", "Độ dài đường chéo trên màn hình", "Hình ảnh trên màn hình được tạo liên tục", "Khoảng thời gian cần thiết để có thể đổi màu một điểm ảnh"], correct: 1, exp: "Kích thước màn hình được đo bằng độ dài đường chéo trên màn hình (đơn vị inch)." },
+            { q: "Máy in kim dùng?", options: ["Một hàng kim gõ vào băng mực để lại vết trên giấy", "Dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt của một trống tĩnh điện tương tự với hình cần in", "Phun các hạt mực màu nước siêu nhỏ để tạo ảnh", "In trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen"], correct: 0, exp: "Máy in kim dùng một hàng kim gõ vào băng mực để lại vết trên giấy." },
+            { q: "Máy in laser dùng?", options: ["Một hàng kim gõ vào băng mực để lại vết trên giấy", "Dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt của một trống tĩnh điện tương tự với hình cần in", "Phun các hạt mực màu nước siêu nhỏ để tạo ảnh", "In trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen"], correct: 1, exp: "Máy in laser dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt trống tĩnh điện." },
+            { q: "Máy in phun dùng?", options: ["Một hàng kim gõ vào băng mực để lại vết trên giấy", "Dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt của một trống tĩnh điện tương tự với hình cần in", "Phun các hạt mực màu nước siêu nhỏ để tạo ảnh", "In trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen"], correct: 2, exp: "Máy in phun dùng các hạt mực màu nước siêu nhỏ phun để tạo ảnh." },
+            { q: "Máy in nhiệt in như thế nào?", options: ["Một hàng kim gõ vào băng mực để lại vết trên giấy", "Dùng tia laser để tạo ra sự thay đổi điện áp trên bề mặt của một trống tĩnh điện tương tự với hình cần in", "Phun các hạt mực màu nước siêu nhỏ để tạo ảnh", "In trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen"], correct: 3, exp: "Máy in nhiệt in trên giấy cảm ứng nhiệt, vùng giấy bị nóng chuyển sang màu đen." },
+            { q: "Có thể kết nối với máy in bằng?", options: ["Cáp", "Mạng có dây", "Mạng không dây", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Có thể kết nối máy in bằng cáp, mạng có dây hoặc mạng không dây." },
+            { q: "Cổng kết nối nào dùng để truyền hình ảnh?", options: ["HDMI", "VGA", "USB", "Mạng"], correct: 1, exp: "Cổng VGA chuyên dùng để truyền tín hiệu hình ảnh." },
+            { q: "Cổng kết nối nào có thể truyền đồng thời cả âm thanh và hình ảnh?", options: ["VGA", "USB", "Mạng", "HDMI"], correct: 3, exp: "Cổng HDMI truyền tải đồng thời cả hình ảnh và âm thanh chất lượng cao." },
+            { q: "Trước khi kết nối thì máy tính hay điện thoại thông minh cần phải", options: ["Mở cổng kết nối", "Đóng cổng kết nối", "Ghép đôi với thiết bị đó", "Đáp án khác"], correct: 2, exp: "Trước khi kết nối thiết bị không dây (như bluetooth), cần thực hiện ghép đôi với thiết bị đó." },
+            { q: "Ghép đôi với thiết bị trước khi kết nối để?", options: ["Có môi trường trung gian kết nối", "Dễ dàng kết nối", "Trao đổi tham số kết nối", "Đáp án khác"], correct: 2, exp: "Ghép đôi giúp trao đổi tham số kết nối giữa các thiết bị." },
+
+            // --- BÀI 6: LƯU TRỮ VÀ CHIA SẺ TỆP TIN TRÊN INTERNET ---
+            { q: "Internet đã khắc phục những rào cản nào của các tài nguyên máy tính?", options: ["Dung lượng đĩa cứng", "Dung lượng thiết bị nhớ ngoài", "Dữ liệu bị hạn chế", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Internet khắc phục toàn bộ các rào cản về dung lượng thiết bị nhớ cũng như giới hạn dữ liệu." },
+            { q: "Các nhà cung cấp dịch vụ lưu trữ thông tin, dữ liệu ngày nay là?", options: ["Google", "Microsoft", "Apple", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Google, Microsoft và Apple đều là các nhà cung cấp dịch vụ lưu trữ lớn." },
+            { q: "Khi đăng kí sử dụng dịch vụ lưu trữ thông tin, dữ liệu trực tuyến thì người dùng sẽ được?", options: ["Cung cấp các dịch vụ xử lý dữ liệu", "Cung cấp phần mềm chỉnh sửa dữ liệu trực tuyến", "Cung cấp một không gian nhớ trực tuyến", "Tạo mới và quản lý thư mục"], correct: 2, exp: "Người dùng sẽ được cung cấp một không gian nhớ trực tuyến." },
+            { q: "Khi sử dụng các dịch vụ lưu trữ và chia sẻ tệp tin trên Internet người dùng có thể?", options: ["Tải tệp hay thư mục của mình lên ổ đĩa trực tuyến", "Tạo mới và quản lý thư mục, tệp trên ổ đĩa trực tuyến", "Chia sẻ thư mục và tệp", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Người dùng có thể thực hiện tải tệp lên, tạo quản lý thư mục và chia sẻ tệp." },
+            { q: "Khi chia sẻ thông tin trên Internet, chủ sở hữu của thư mục, tệp có thể quyết định chế độ chia sẻ nào dưới đây?", options: ["Quyền chỉ xem", "Quyền được nhận xét", "Quyền chỉnh sửa", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Chủ sở hữu có thể phân quyền chỉ xem, được nhận xét hoặc chỉnh sửa." },
+            { q: "Quyền chỉnh sửa là quyền cho phép?", options: ["Xem thư mục và tệp", "Nhận xét thư mục và tệp", "Thực hiện mọi thao tác với thư mục và tệp", "Cả ba đáp án trên đều đúng"], correct: 2, exp: "Quyền chỉnh sửa cho phép thực hiện mọi thao tác (xem, sửa, xóa, tạo mới) với thư mục và tệp." },
+            { q: "Vì sao nên lưu trữ thông tin trên internet?", options: ["Dung lượng bộ nhớ lớn", "Tính bảo mật cao, có thể tùy chỉnh", "Dễ dàng tìm kiếm", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Lưu trữ trên Internet có dung lượng bộ nhớ lớn, bảo mật cao và dễ dàng tìm kiếm, truy cập mọi lúc." },
+            { q: "Đâu là dịch vụ lưu trữ và chia sẻ thông tin trực tuyến của Google?", options: ["One Drive", "iCloud", "Dropbox", "Google Drive"], correct: 3, exp: "Google Drive là dịch vụ lưu trữ trực tuyến của Google." },
+            { q: "Sau khi chia sẻ thư mục, tệp người dùng có thể?", options: ["Xóa bỏ tệp đã chia sẻ", "Hủy bỏ hoặc thay đổi chế độ chia sẻ", "Làm mới tệp chia sẻ", "Đáp án khác"], correct: 1, exp: "Người dùng có thể hủy bỏ hoặc thay đổi chế độ chia sẻ bất kỳ lúc nào." },
+            { q: "Internet giúp khắc phục giới hạn lưu trữ bằng?", options: ["Các dịch vụ chia sẻ tệp tin trực tuyến", "Phân phối bán lẻ bộ nhớ", "Cho người dùng thuê bộ nhớ", "Bắt người dùng mua phần mềm thứ 3"], correct: 0, exp: "Internet khắc phục giới hạn lưu trữ bằng các dịch vụ chia sẻ tệp tin trực tuyến." },
+            { q: "Người dùng đăng ký sử dụng dịch vụ và được cấp một không gian lưu trữ trực tuyến gọi là?", options: ["Cầu kết nối", "Nhà lưu trữ", "Đĩa trực tuyến", "Đáp án khác"], correct: 2, exp: "Không gian lưu trữ trực tuyến được gọi là đĩa trực tuyến (ổ đĩa trực tuyến)." },
+            { q: "Để có không gian lưu trữ trên internet người dùng cần phải có?", options: ["Tài khoản nơi lưu trữ đó", "Bộ xuất tài liệu ra ổ cứng", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 0, exp: "Người dùng cần có tài khoản tại nhà cung cấp dịch vụ lưu trữ đó." },
+            { q: "Tải tệp lên ổ đĩa trực tuyến cho người dùng....?", options: ["Xóa các tệp và file trong máy tính mình đi", "Tải các tệp hay thư mục từ máy tính của mình lên ổ đĩa trực tuyến để lưu trữ và sử dụng", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 1, exp: "Tải tệp lên giúp đưa các tệp từ máy tính lên ổ đĩa trực tuyến để lưu trữ và sử dụng." },
+            { q: "Các không gian lưu trữ trên internet có giới hạn dung lượng hay không?", options: ["Không, nó là vô hạn", "Không kết luận được", "Không, vì không gian thì không có dung lượng", "Có"], correct: 3, exp: "Các không gian lưu trữ trực tuyến đều có giới hạn dung lượng tùy theo gói dịch vụ." },
+            { q: "Ưu điểm của việc lưu trữ thông tin trực tuyến là?", options: ["Cho phép chia sẻ thư mục, tệp cho người dùng khác", "Không cho phép chia sẻ thư mục, tệp cho người dùng khác", "Bán được thông tin cho nhau để kiếm tiền", "Thích vào thư mục của ai cũng được"], correct: 0, exp: "Ưu điểm lớn là cho phép dễ dàng chia sẻ tài liệu cho người dùng khác." },
+            { q: "Người dùng có thể xem và nhận xét là quyền?", options: ["Chỉ xem", "Chỉnh sửa", "Được nhận xét", "Đáp án khác"], correct: 2, exp: "Quyền được nhận xét (hoặc quyền bình luận/comment)." },
+            { q: "Người dùng có thể xem là quyền?", options: ["Chỉ xem", "Chỉnh sửa", "Được nhận xét", "Đáp án khác"], correct: 0, exp: "Quyền chỉ xem (Viewer)." },
+            { q: "Người dùng có thể xem, nhận xét và thực hiện mọi thao tác với thư mục và tệp là quyền?", options: ["Chỉ xem", "Chỉnh sửa", "Được nhận xét", "Đáp án khác"], correct: 1, exp: "Quyền chỉnh sửa (Editor)." },
+            { q: "Trong quyền được chỉnh sửa thì người dùng có thể?", options: ["Chỉnh sửa thư mục", "Xóa thư mục", "Tạo mới thư mục", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Quyền chỉnh sửa cho phép thực hiện chỉnh sửa, xóa và tạo mới thư mục." },
+            { q: "Khi nào thì người dùng được cung cấp một ổ đĩa trực tuyến?", options: ["Cài đặt hệ điều hành mới", "Mua các phần mềm nguồn mở", "Sử dụng dịch vụ lưu trữ thư mục và tệp trực tuyến", "Cả ba đáp án trên đều sai"], correct: 2, exp: "Người dùng được cấp ổ đĩa trực tuyến khi sử dụng dịch vụ lưu trữ thư mục và tệp trực tuyến." },
+
+            // --- BÀI 7: THỰC HÀNH TÌM KIẾM THÔNG TIN TRÊN INTERNET ---
+            { q: "Để khởi động công cụ tìm kiếm thì em cần?", options: ["Mở trình duyệt internet trên máy tính của em", "Gõ địa chỉ URL máy tìm kiếm", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 2, exp: "Em cần mở trình duyệt và gõ địa chỉ URL máy tìm kiếm." },
+            { q: "Đâu là địa chỉ URL tìm kiếm?", options: ["tech12h.com", "newocr.com", "Google.com", "Cả ba đáp án trên đều sai"], correct: 2, exp: "Google.com là một địa chỉ URL máy tìm kiếm phổ biến." },
+            { q: "Nếu kết quả tìm kiếm chưa được như ý muốn của em thì?", options: ["Em sử dụng máy tìm kiếm khác", "Em sử dụng trình duyệt khác", "Em quay lại nhập từ khóa khác", "Đáp án khác"], correct: 2, exp: "Em nên quay lại nhập từ khóa khác phù hợp hơn." },
+            { q: "Để thực hiện tìm kiếm bằng tiếng nói thì em phải tìm kiếm?", options: ["Bằng từ khóa nhập từ bàn phím", "Trình duyệt bằng tiếng nói", "Bằng từ khóa nhập bằng tiếng nói", "Cả ba đáp án trên đều đúng"], correct: 2, exp: "Tìm kiếm bằng tiếng nói thực hiện bằng từ khóa nhập bằng tiếng nói." },
+            { q: "Sau khi đọc từ khóa tìm kiếm thì em nên?", options: ["Kiểm tra từ khóa sau khi nhập từ bàn phím đã khớp hay chưa", "Kiểm tra kết quả tìm kiếm", "Kiểm tra từ khóa được tự động điền sau khi đọc đã khớp hay chưa", "Đáp án khác"], correct: 2, exp: "Kiểm tra từ khóa được tự động điền sau khi đọc đã khớp hay chưa." },
+            { q: "Để thực hiện tìm kiếm bằng tiếng nói thì cần có?", options: ["Bàn phím", "Con chuột", "Micro", "Loa"], correct: 2, exp: "Cần có thiết bị micro để thu âm thanh giọng nói." },
+            { q: "Khi tìm kiếm em có thể nhận được kết quả dưới dạng nào dưới đây?", options: ["Tin tức", "Hình ảnh", "Video", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Kết quả tìm kiếm có thể dưới dạng tin tức, hình ảnh, video..." },
+            { q: "Để giúp nâng cao hiệu quả tìm kiếm thông tin em có thể?", options: ["Tìm kiếm thông tin dưới dạng hình ảnh", "Tìm kiếm thông tin dưới dạng tin tức", "Tìm kiếm thông tin dưới dạng video", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Lựa chọn các dạng kết quả phù hợp giúp nâng cao hiệu quả tìm kiếm." },
+            { q: "Để tìm kiếm thông tin dưới các dạng khác nhau thì em cần?", options: ["Sử dụng hình ảnh để tìm kiếm", "Chọn dạng phân loại kết quả tìm kiếm", "Sử dụng video để tìm kiếm", "Đáp án khác"], correct: 1, exp: "Em cần chọn dạng phân loại kết quả tìm kiếm trên công cụ tìm kiếm." },
+            { q: "Khi tìm kiếm thông tin tuyển sinh của một trường đại học thì em nên yêu cầu tìm dưới dạng nào dưới đây?", options: ["Tệp .pdf", "Hình ảnh", "Bài báo", "Tin tức"], correct: 3, exp: "Thông tin tuyển sinh thường được tìm kiếm dưới dạng tin tức hoặc thông báo chính thức." },
+            { q: "Khi muốn tìm kiếm ảnh về hoa hồng thì em nên chọn tìm kiếm thông tin dạng?", options: ["Bài viết", "Tin tức", "Hình ảnh", "Đáp án khác"], correct: 2, exp: "Khi tìm ảnh nên chọn dạng Hình ảnh (Images)." },
+            { q: "Để tìm kiếm thông tin dưới dạng tệp tin pdf thì em cần?", options: ["Nhập từ khóa tìm kiếm và bổ sung cụm từ filetype.docx", "Nhập từ khóa tìm kiếm và bổ sung cụm từ filetype.jpg", "Nhập từ khóa tìm kiếm và bổ sung cụm từ filetype:pdf", "Đáp án khác"], correct: 2, exp: "Bổ sung cụm từ filetype:pdf để tìm kiếm file định dạng PDF." },
+            { q: "Để thu hẹp phạm vi tìm kiếm thì?", options: ["Đặt từ khóa cần tìm trong dấu nháy kép", "Đặt từ khóa trong dấu ngoặc đơn", "Đặt từ khóa trong dấu ngoặc vuông", "Rút gọn từ khóa"], correct: 0, exp: "Đặt cụm từ khóa trong dấu nháy kép giúp tìm chính xác cụm từ đó và thu hẹp phạm vi tìm kiếm." },
+            { q: "Đặt từ khóa cần tìm trong dấu nháy kép có tác dụng?", options: ["Thu hẹp phạm vi tìm kiếm", "Cho kết quả tìm kiếm chính xác hơn", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 2, exp: "Vừa thu hẹp phạm vi vừa cho kết quả chính xác hơn theo đúng cụm từ." },
+            { q: "Xây dựng từ khóa tìm kiếm làm?", options: ["Tăng độ chính xác của kết quả", "Tăng hiệu quả tìm kiếm", "Tiết kiệm thời gian tìm kiếm", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Xây dựng từ khóa tốt giúp tăng độ chính xác, tăng hiệu quả và tiết kiệm thời gian." },
+            { q: "Chọn đáp án sai?", options: ["Người không biết cách tìm kiếm tài liệu đúng sẽ không tìm kiếm được tài liệu nhanh và chính xác", "Người biết cách tìm kiếm sẽ tìm được rất nhanh và chính xác", "Người không biết xây dựng từ khóa tìm kiếm sẽ tìm kiếm nhanh hơn", "Ngày nay, tất cả mọi thông tin đều có thể tìm thấy trên Internet"], correct: 2, exp: "Phát biểu 'Người không biết xây dựng từ khóa tìm kiếm sẽ tìm kiếm nhanh hơn' là phát biểu sai." },
+            { q: "Nguyên nhân dẫn đến tìm kiếm thông tin chậm, thiếu chính xác là?", options: ["Từ khóa tìm kiếm chưa đầy đủ", "Cách tìm kiếm tài liệu không đúng", "Chưa biết cách xây dựng từ khóa", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Do từ khóa chưa đầy đủ, cách tìm kiếm không đúng hoặc chưa biết cách xây dựng từ khóa." },
+            { q: "Đâu là cách tìm kiếm thông tin hiệu quả?", options: ["Đặt từ khóa trong dấu ngoặc đơn", "Xây dựng từ khóa phù hợp", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 1, exp: "Xây dựng từ khóa phù hợp là cách tìm kiếm thông tin hiệu quả." },
+            { q: "Khi em muốn tìm kiếm thông tin về tình hình dịch bệnh thì em nên tìm kiếm thông tin dưới dạng?", options: ["Tin tức", "Hình ảnh", "File pdf", "Đáp án khác"], correct: 0, exp: "Thông tin dịch bệnh cập nhật nên tìm kiếm dưới dạng Tin tức (News)." },
+            { q: "Khi muốn tìm hiểu thông tin về lập trình viên thì em có thể tìm kiếm thông tin bằng các từ khóa nào dưới đây?", options: ["Lập trình viên là gì", "Đặc điểm của lập trình viên", "Nhiệm vụ của lập trình viên", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Các từ khóa về định nghĩa, đặc điểm, nhiệm vụ đều giúp tìm hiểu về lập trình viên." },
+
+            // --- BÀI 8: THỰC HÀNH NÂNG CAO SỬ DỤNG THƯ ĐIỆN TỬ VÀ MẠNG XÃ HỘI ---
+            { q: "Việc sử dụng và tìm kiếm thư điện tử sẽ thuận tiện hơn nhờ?", options: ["Việc đánh dấu, phân loại thư điện tử", "Sắp xếp thư điện tử một cách hợp lý", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 2, exp: "Nhờ cả việc đánh dấu, phân loại và sắp xếp thư điện tử hợp lý." },
+            { q: "Gmail hỗ trợ việc?", options: ["Phân loại thư quan trọng", "Tự động đánh dấu thư", "Tự động xác định và đánh dấu thư thuộc loại quan trọng", "Cả ba đáp án trên đều sai"], correct: 2, exp: "Gmail tự động xác định và đánh dấu thư thuộc loại quan trọng." },
+            { q: "Gmail tự động xác định và đánh dấu thư thuộc loại quan trọng bằng?", options: ["Phần mềm đánh dấu", "Chức năng lọc thư", "Dấu quan trọng màu vàng", "Đáp án khác"], correct: 2, exp: "Gmail hiển thị dấu quan trọng màu vàng bên cạnh thư." },
+            { q: "Dựa vào đâu để Gmail tự động xác định và đánh dấu thư thuộc loại quan trọng?", options: ["Người gửi và tần suất gửi cho một người", "Thư điện tử được mở và trả lời", "Từ khóa có trong thư điện tử thường xuyên đọc", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Dựa vào người gửi, tần suất gửi, thư được mở/trả lời và từ khóa thường đọc." },
+            { q: "Để biết được lí do thư đó được đánh dấu là quan trọng ta vào?", options: ["Vào hộp thư nháp, di chuyển con trỏ chuột vào dấu quan trọng màu vàng", "Vào hộp thư đến, di chuyển con trỏ chuột vào dấu quan trọng màu vàng", "Vào hộp thư rác, di chuyển con trỏ chuột vào dấu quan trọng màu vàng", "Đáp án khác"], correct: 1, exp: "Vào hộp thư đến, di chuyển con trỏ chuột vào dấu quan trọng màu vàng." },
+            { q: "Thực hiện tìm kiếm từ khóa nào để hiển thị danh sách tất cả thư điện tử quan trọng?", options: ["is: early", "is: delete", "is: important", "Đáp án khác"], correct: 2, exp: "Sử dụng từ khóa 'is:important' để tìm thư quan trọng." },
+            { q: "Để sắp xếp phân loại thư trong hộp thư đến thì em sử dụng?", options: ["Dấu quan trọng", "Dấu sao", "Nhãn (Label)", "Đáp án khác"], correct: 2, exp: "Sử dụng nhãn (Label) để sắp xếp phân loại thư." },
+            { q: "Việc tìm kiếm is: important để?", options: ["Sắp xếp, phân loại thư trong hộp thư đến", "Hiển thị danh sách tất cả thư điện tử quan trọng", "Xóa các thư đến", "Đáp án khác"], correct: 1, exp: "Dùng để hiển thị danh sách tất cả thư điện tử quan trọng." },
+            { q: "Sử dụng nhãn (label) giúp?", options: ["Tiết kiệm thời gian khi tìm kiếm lại các thư", "Tránh thất lạc thông tin ở các thư cũ", "Quản lý việc nhận thư từ các địa chỉ", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Nhãn giúp tiết kiệm thời gian tìm kiếm, tránh thất lạc thông tin và quản lý việc nhận thư tốt hơn." },
+            { q: "Khi em xóa một thư thì?", options: ["Thư đó sẽ bị xóa khỏi mọi nhãn đính kèm", "Thư đó sẽ bị xóa khỏi mọi nhãn đính kèm cũng như trong hộp thư đến", "Thư đó sẽ bị xóa khỏi hộp thư đến", "Tránh thất lạc thông tin ở các thư cũ"], correct: 1, exp: "Thư đó sẽ bị xóa khỏi mọi nhãn đính kèm cũng như trong hộp thư đến." },
+            { q: "Để tạo nhãn thì em cần?", options: ["Truy cập Gmail", "Nháy chuột vào Danh sách mở rộng ở bên trái cửa sổ", "Nháy chuột vào Tạo nhãn mới", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Cần truy cập Gmail, nháy chuột vào Danh sách mở rộng và chọn 'Tạo nhãn mới'." },
+            { q: "Để gán nhãn cho các thư trong hộp thư đến thì?", options: ["Em chọn thư cần gán nhãn", "Nháy chuột mở danh sách nhãn", "Chọn nhãn muốn gán", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Chọn thư cần gán, mở danh sách nhãn và chọn nhãn muốn gán." },
+            { q: "Fanpage là trang web trên?", options: ["Google", "Coccoc", "Facebook", "Cả ba đáp án trên đều sai"], correct: 2, exp: "Fanpage là trang cộng đồng/doanh nghiệp trên mạng xã hội Facebook." },
+            { q: "Fanpage có tác dụng?", options: ["Giúp các tổ chức, doanh nghiệp quảng bá thương hiệu", "Giúp các tổ chức, doanh nghiệp quảng bá hình ảnh", "Giúp các tổ chức, doanh nghiệp quảng bá sản phẩm", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Fanpage giúp quảng bá thương hiệu, hình ảnh và sản phẩm của tổ chức, doanh nghiệp." },
+            { q: "Em có thể thiết lập ai xem các bài viết của em trong tương lai?", options: ["Bạn bè", "Chỉ mình tôi", "Công khai", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Có thể thiết lập chế độ Bạn bè, Chỉ mình tôi hoặc Công khai." },
+            { q: "Để cài đặt quyền riêng tư trên Facebook thì em vào?", options: ["Bảng tin", "Video", "Cài đặt", "Trang cá nhân"], correct: 2, exp: "Vào mục Cài đặt (Settings) trên Facebook." },
+            { q: "Cách giúp em tìm đọc lại được những thư em đã nhận trước đây là?", options: ["Kéo xuống tìm kiếm theo thời gian hiển thị của thư trong mục hộp thư đến", "Chọn tìm kiếm và phân loại theo mốc thời gian", "Chọn tìm kiếm và phân loại theo tên người gửi và kéo xuống tìm kiếm theo thời gian", "Cả ba đáp án trên đều đúng"], correct: 3, exp: "Có thể tìm kiếm theo thời gian, phân loại mốc thời gian hoặc theo tên người gửi." },
+            { q: "Vì sao em nên dùng Đánh dấu và phân loại email bằng cách sử dụng màu sắc của biểu tượng đánh dấu hình ngôi sao?", options: ["Màu sắc của biểu tượng đánh dấu hình ngôi sao giúp cho bạn rèn luyện trí nhớ tốt hơn", "Cách sắp xếp công việc thuận tiện, nhanh hơn", "Cả hai đáp án trên đều đúng", "Cả hai đáp án trên đều sai"], correct: 1, exp: "Giúp sắp xếp công việc thuận tiện và nhanh chóng hơn." },
+            { q: "Phát biểu nào sau đây là đúng khi nói về thư điện tử?", options: ["Nhìn vào hộp thư điện tử, người gửi có thể biết được bức thư mình đã gửi đi người nhận đã đọc hay chưa", "Chỉ có người nhận thư mới mở được tệp đính kèm theo thư, còn người gửi sẽ không mở được tệp đính kèm khi đã gửi thư", "Trong hộp thư đến chỉ chứa thư của những người quen biết", "Nhìn vào hộp thư điện tử có thể biết thư đã đọc hay chưa"], correct: 3, exp: "Nhìn vào hộp thư điện tử có thể biết thư đã đọc hay chưa." },
+            { q: "Theo quy định của Google, trẻ vị thành niên muốn đăng kí tài khoản thư điện tử thì:", options: ["Không được phép sử dụng Gmail", "Chỉ được sử dụng tài khoản của người thân", "Cần có sự đồng ý, trợ giúp và quản lí của bố mẹ", "Cần phải cung cấp đầy đủ các thông tin về gia đình, trường học"], correct: 2, exp: "Trẻ vị thành niên cần có sự đồng ý, trợ giúp và quản lí của bố mẹ khi đăng ký tài khoản." },
+            { q: "Em và bạn em đã trao đổi thư điện tử với nhau thì cách nào sau đây là tốt nhất để biết địa chỉ thư điện tử của bạn em?", options: ["Thử một địa chỉ thư điện tử bất kì nào đó", "Tìm trong danh bạ địa chỉ của hệ thống thư điện tử", "Sử dụng máy tìm kiếm Google để tìm trên Internet", "Gọi điện thoại cho bạn để hỏi"], correct: 1, exp: "Tìm trong danh bạ địa chỉ của hệ thống thư điện tử." },
+            { q: "Thư điện tử có lợi ích gì trong việc giải quyết các công việc của em?", options: ["Sửa tài liệu", "Trao đổi thông tin qua lại với bạn bè", "Tiết kiệm thời gian và tiền bạc", "Cả ba đáp án trên đều đúng"], correct: 2, exp: "Thư điện tử giúp tiết kiệm thời gian và tiền bạc trong việc trao đổi thông tin." },
+            { q: "Khi em nhận được thư điện tử có tệp đính kèm nghi ngờ là virus từ người quen, em nên xử lí như thế nào?", options: ["Mở tệp đính kèm và lưu tệp đó vào máy tính của mình", "Trước khi mở tệp đính kèm, em tìm cách nhắn tin hoặc gửi một thư điện tử khác cho người đã gửi thư để kiểm tra có đúng người đó gửi tệp đó cho em hay không", "Mở tệp đính kèm và xóa tệp đó ngay nếu nhận thấy tệp bị nhiễm virus", "Trước khi mở tệp đính kèm, em chuyển sang máy tính khác để mở lại thư điện tử đó."], correct: 1, exp: "Trước khi mở tệp đính kèm, em tìm cách nhắn tin hoặc gửi thư khác để kiểm tra xem có đúng người đó gửi hay không." },
+            { q: "Phát biểu nào sau đây là sai:", options: ["Cần đăng xuất ra khỏi hộp thư điện tử sau khi sử dụng xong.", "Thời gian gửi thư điện tử rất ngắn gần như ngay lập tức", "Cần mở tất cả các tệp đính kèm được gửi cho bạn", "Chỉ mở tệp đính kèm từ những người bạn biết và tin tưởng."], correct: 2, exp: "Phát biểu 'Cần mở tất cả các tệp đính kèm được gửi cho bạn' là hoàn toàn sai và nguy hiểm." }
+        ];
+
+        let currentQIndex = 0;
+        let quizQuestions = [];
+        let userAnswers = {};
+        let timerSeconds = 15 * 60;
+        let timerInterval = null;
+        let studentData = {};
+        let isSubmitted = false;
+
+        // CHỐNG GIAN LẬN: Chặn chuột phải và phím tắt F12, Ctrl+Shift+I/J/C, Ctrl+U/S
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            alert("Cảnh báo: Thao tác chuột phải bị cấm trong giờ kiểm tra!");
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (
+                e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) || 
+                (e.ctrlKey && ['U', 'u', 'S', 's'].includes(e.key))
+            ) {
+                e.preventDefault();
+                alert("Cảnh báo: Phím tắt can thiệp mã nguồn bị khóa!");
+                return false;
+            }
+        });
+
+        // BẮT SỰ KIỆN GIAN LẬN THOÁT FULLSCREEN -> GHI NHẬN VÀ KẾT THÚC BÀI NGAY LẬP TỨC
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && !document.getElementById('quiz-screen').classList.contains('hidden') && !isSubmitted) {
+                alert("CẢNH BÁO: Bạn đã thoát khỏi chế độ toàn màn hình! Hệ thống ghi nhận gian lận và tự động nộp bài ngay lập tức.");
+                submitQuiz("Vi phạm quy chế: Thoát chế độ toàn màn hình");
+            }
+        });
+
+        // Check local storage on load & LẤY THÔNG TIN TỪ FILE INDEX QUA master_exam_data
+        window.addEventListener('DOMContentLoaded', () => {
+            const masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+            if (masterData && masterData.name && masterData.className && masterData.stt) {
+                document.getElementById('student-name').value = masterData.name;
+                document.getElementById('student-class').value = masterData.className;
+                document.getElementById('student-stt').value = masterData.stt;
+            }
+
+            const savedDone = localStorage.getItem('tin11_tonghop_done');
+            if (savedDone) {
+                try {
+                    const data = JSON.parse(savedDone);
+                    document.getElementById('already-done-alert').classList.remove('hidden');
+                    document.getElementById('done-student-info').innerText = `${data.name} - Lớp: ${data.className} - STT: ${data.stt}`;
+                } catch(e) {}
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            const inputVal = prompt("Nhập từ khóa bảo mật để mở khóa:");
+            if (inputVal !== null) {
+                if (textToBinary(inputVal.trim()) === resetBinaryKey) {
+                    localStorage.removeItem('tin11_tonghop_done');
+                    alert("Mở khóa thành công! Hệ thống đã được reset trạng thái.");
+                    location.reload();
+                } else {
+                    alert("Từ khóa không chính xác! Không thể mở khóa.");
+                }
+            }
+        });
+
+        document.getElementById('reg-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('student-name').value.trim();
+            const className = document.getElementById('student-class').value.trim();
+            const stt = document.getElementById('student-stt').value.trim();
+
+            if (!name || !className || !stt) {
+                alert("Vui lòng điền đầy đủ họ tên, lớp và STT!");
+                return;
+            }
+
+            studentData = { name, className, stt };
+
+            let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+            masterData.name = name;
+            masterData.className = className;
+            masterData.stt = stt;
+            masterData.step = 1;
+            localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => {
+                    console.log("Không thể bật toàn màn hình tự động:", err);
+                });
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+
+            // Lấy ngẫu nhiên 30 câu hỏi từ ngân hàng 89 câu
+            quizQuestions = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 30);
+            userAnswers = {};
+            isSubmitted = false;
+
+            document.getElementById('reg-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+
+            renderPalette();
+            loadQuestion(0);
+            startTimer();
+        });
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                let m = Math.floor(timerSeconds / 60);
+                let s = timerSeconds % 60;
+                document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Đã hết thời gian làm bài!");
+                    submitQuiz("Đã hết thời gian");
+                }
+            }, 1000);
+        }
+
+        function renderPalette() {
+            const paletteContainer = document.getElementById('question-palette');
+            paletteContainer.innerHTML = '';
+            quizQuestions.forEach((_, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'palette-btn';
+                btn.innerText = idx + 1;
+                if (idx === currentQIndex) btn.classList.add('current');
+                if (userAnswers[idx] !== undefined) btn.classList.add('answered');
+                btn.onclick = () => goToQuestion(idx);
+                paletteContainer.appendChild(btn);
+            });
+        }
+
+        function goToQuestion(idx) {
+            currentQIndex = idx;
+            loadQuestion(currentQIndex);
+            updatePaletteActive();
+        }
+
+        function updatePaletteActive() {
+            const buttons = document.querySelectorAll('.palette-btn');
+            buttons.forEach((btn, idx) => {
+                btn.classList.remove('current');
+                if (idx === currentQIndex) btn.classList.add('current');
+                if (userAnswers[idx] !== undefined) {
+                    btn.classList.add('answered');
+                } else {
+                    btn.classList.remove('answered');
+                }
+            });
+        }
+
+        function loadQuestion(idx) {
+            const q = quizQuestions[idx];
+            document.getElementById('current-q-num').innerText = idx + 1;
+            document.getElementById('question-text').innerText = `${idx + 1}. ${q.q}`;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const badges = ['A', 'B', 'C', 'D'];
+            q.options.forEach((opt, optIdx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'option-btn';
+                if (userAnswers[idx] === optIdx) {
+                    btn.classList.add('selected');
+                }
+
+                btn.innerHTML = `<div class="option-badge">${badges[optIdx]}</div> <div>${opt}</div>`;
+                btn.onclick = () => selectOption(idx, optIdx);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('prev-btn').disabled = idx === 0;
+            document.getElementById('next-btn').innerText = idx === quizQuestions.length - 1 ? 'Hoàn Thành' : 'Câu Sau →';
+        }
+
+        function selectOption(qIdx, optIdx) {
+            userAnswers[qIdx] = optIdx;
+            loadQuestion(qIdx);
+            updatePaletteActive();
+        }
+
+        document.getElementById('prev-btn').onclick = () => {
+            if (currentQIndex > 0) {
+                currentQIndex--;
+                loadQuestion(currentQIndex);
+                updatePaletteActive();
+            }
+        };
+
+        document.getElementById('next-btn').onclick = () => {
+            if (currentQIndex < quizQuestions.length - 1) {
+                currentQIndex++;
+                loadQuestion(currentQIndex);
+                updatePaletteActive();
+            } else {
+                if (confirm("Bạn có chắc chắn muốn nộp bài không?")) {
+                    submitQuiz("Đã hoàn thành");
+                }
+            }
+        };
+
+        document.getElementById('submit-early-btn').onclick = () => {
+            const answeredCount = Object.keys(userAnswers).length;
+            if (confirm(`Bạn đã trả lời ${answeredCount}/30 câu. Bạn có chắc muốn nộp bài sớm không?`)) {
+                submitQuiz("Nộp bài sớm");
+            }
+        };
+
+        function submitQuiz(statusReason = "Đã hoàn thành") {
+            if (isSubmitted) return;
+            isSubmitted = true;
+            clearInterval(timerInterval);
+
+            if (document.exitFullscreen && document.fullscreenElement) {
+                document.exitFullscreen().catch(err => {});
+            }
+
+            let correctCount = 0;
+            quizQuestions.forEach((q, idx) => {
+                if (userAnswers[idx] === q.correct) {
+                    correctCount++;
+                }
+            });
+
+            // Tổng 30 câu, mỗi câu đúng 0.2 điểm -> tối đa 6.0 điểm
+            const score = correctCount * 0.2;
+
+            let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+            masterData.p1 = score;
+            masterData.step = 2;
+            localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+            setTimeout(() => {
+                const reviewList = document.getElementById('review-list');
+                if (reviewList && !document.getElementById('btn-goto-p2')) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<button id="btn-goto-p2" onclick="parent.postMessage({examGo:'2'},'*')" style="background-color:#2563eb; color:white; padding:14px; font-size:1.1rem; font-weight:bold; border:none; border-radius:8px; cursor:pointer; width:100%; margin: 20px 0; box-shadow: 0 4px 10px rgba(37,99,235,0.3);">👉 BẤM VÀO ĐÂY ĐỂ TIẾP TỤC LÀM PHẦN 2 (ĐÚNG / SAI)</button>`;
+                    reviewList.parentNode.insertBefore(div, reviewList);
+                }
+            }, 100);
+
+            localStorage.setItem('tin11_tonghop_done', JSON.stringify({
+                name: studentData.name,
+                className: studentData.className,
+                stt: studentData.stt,
+                score: score.toFixed(1),
+                status: statusReason
+            }));
+
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            document.getElementById('score-val').innerText = score.toFixed(1);
+            document.getElementById('correct-count').innerText = correctCount;
+            document.getElementById('incorrect-count').innerText = 30 - correctCount;
+            document.getElementById('res-student-name').innerText = studentData.name;
+            document.getElementById('res-student-class').innerText = studentData.className;
+            document.getElementById('res-student-stt').innerText = studentData.stt;
+            
+            const statusEl = document.getElementById('res-status');
+            statusEl.innerText = statusReason;
+            if (statusReason.includes("Vi phạm")) {
+                statusEl.style.color = "#dc2626";
+            }
+
+            const badge = document.getElementById('result-badge');
+            document.getElementById('res-top-stt').innerText = studentData.stt;
+            document.getElementById('res-top-class').innerText = studentData.className;
+            badge.classList.remove('hidden');
+
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+            const badges = ['A', 'B', 'C', 'D'];
+
+            quizQuestions.forEach((q, idx) => {
+                const userChoice = userAnswers[idx];
+                const isCorrect = userChoice === q.correct;
+                const div = document.createElement('div');
+                div.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
+
+                let html = `<div style="font-weight:600; margin-bottom:8px;">Câu ${idx + 1}: ${q.q}</div>`;
+                q.options.forEach((opt, optIdx) => {
+                    let style = "padding: 6px 10px; margin: 4px 0; border-radius: 6px; font-size: 0.9rem;";
+                    if (optIdx === q.correct) {
+                        style += " background-color: #d1fae5; color: #065f46; font-weight: bold;";
+                    } else if (optIdx === userChoice && !isCorrect) {
+                        style += " background-color: #fee2e2; color: #991b1b; text-decoration: line-through;";
+                    } else {
+                        style += " background-color: #ffffff; border: 1px solid #e2e8f0;";
+                    }
+                    html += `<div style="${style}">${badges[optIdx]}. ${opt} ${optIdx === q.correct ? ' (Đáp án đúng)' : ''} ${optIdx === userChoice && !isCorrect ? ' (Bạn chọn)' : ''}</div>`;
+                });
+
+                html += `<div class="explanation"><b>Giải thích:</b> ${q.exp}</div>`;
+                div.innerHTML = html;
+                reviewList.appendChild(div);
+            });
+        }
+    <\/script>
+</body>
+</html></script>
+<script type="text/plain" id="tpl-2"><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra Trắc Nghiệm Đúng - Sai Tin Học 11</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px 30px 30px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-teacher-unlock {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: auto;
+            z-index: 10;
+        }
+        .btn-teacher-unlock:hover {
+            background-color: #d35400;
+        }
+        .question-card {
+            background: #fafafa;
+            border-left: 5px solid #3498db;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+        }
+        .sub-question {
+            margin: 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .options label {
+            display: inline-block;
+            margin-left: 15px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        #lock-screen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 9999;
+            padding: 30px 40px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .result-layout {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+        .student-info-output {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #2c3e50;
+        }
+        .score-output {
+            font-size: 80px;
+            font-weight: 900;
+            color: #e74c3c;
+            margin-right: 30px;
+            line-height: 1;
+        }
+        .warning-msg {
+            color: #c0392b;
+            font-weight: bold;
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        #timer {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 10px;
+        }
+        .explanation-container {
+            margin-top: 30px;
+            border-top: 2px solid #e74c3c;
+            padding-top: 20px;
+        }
+        .explanation-title {
+            color: #c0392b;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+        .wrong-item {
+            background-color: #fdf2e9;
+            border-left: 4px solid #e67e22;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .wrong-item-header {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .wrong-item-details {
+            font-size: 15px;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+        .wrong-item-exp {
+            font-size: 14px;
+            color: #27ae60;
+            font-style: italic;
+            background: #eafaf1;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-top: 6px;
+        }
+        #teacher-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 350px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        }
+    </style>
+</head>
+<body>
+
+<div id="main-app" class="container">
+    <button class="btn-teacher-unlock" onclick="openTeacherModal()">🔑 GV Mở Khóa</button>
+
+    <div id="start-screen">
+        <h1>BÀI KIỂM TRA TRẮC NGHIỆM TIN HỌC 11</h1>
+        <h2>Sách Kết Nối Tri Thức - GV: Vũ Thị Thu Thảo</h2>
+        <p style="text-align: center; color: #7f8c8d;">Hệ thống chọn ngẫu nhiên 2 câu hỏi. Đúng mỗi ý nhỏ được 0.25 điểm. Tổng: 2 điểm.</p>
+        
+        <div id="cooldown-message" style="display:none; color:#c0392b; font-weight:bold; text-align:center; margin-bottom:20px;"></div>
+
+        <div class="form-group">
+            <label for="student-stt">Số thứ tự (STT):</label>
+            <input type="text" id="student-stt" placeholder="Nhập số thứ tự của em...">
+        </div>
+        <div class="form-group">
+            <label for="student-name">Họ và tên học sinh:</label>
+            <input type="text" id="student-name" placeholder="Nhập đầy đủ họ tên...">
+        </div>
+        <div class="form-group">
+            <label for="student-class">Lớp:</label>
+            <input type="text" id="student-class" placeholder="Nhập tên lớp...">
+        </div>
+        <button id="btn-start" onclick="startQuiz()">Bắt Đầu Làm Bài</button>
+    </div>
+
+    <div id="quiz-screen" style="display: none;">
+        <div id="timer">Thời gian còn lại: <span id="time-left">04:00</span></div>
+        <div id="quiz-container"></div>
+        <button id="btn-submit" onclick="finishQuiz(false)">Nộp Bài</button>
+    </div>
+</div>
+
+<div id="teacher-modal">
+    <div class="modal-content">
+        <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">🔑 Xác thực Giáo viên</h3>
+        <p style="font-size: 14px; color: #7f8c8d; text-align: center;">Nhập mật khẩu để hủy thời gian chờ:</p>
+        <input type="password" id="teacher-pass-input" placeholder="Nhập mật khẩu..." style="width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 16px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px;">
+            <button onclick="submitTeacherPass()" style="background-color: #27ae60; flex: 1; padding: 10px;">Xác Nhận</button>
+            <button onclick="closeTeacherModal()" style="background-color: #7f8c8d; flex: 1; padding: 10px;">Hủy</button>
+        </div>
+    </div>
+</div>
+
+<div id="lock-screen">
+    <div id="cheat-warning" class="warning-msg" style="display: none;">
+        PHÁT HIỆN HÀNH VI GIAN LẬN (MỞ CODE/F12/THAY ĐỔI CỬA SỔ)! BÀI THI LẬP TỨC KẾT THÚC.
+    </div>
+    <div class="result-layout">
+        <div class="student-info-output">
+            <h2 style="text-align: left; margin-top: 0;">KẾT QUẢ BÀI LÀM</h2>
+            <div><strong>Số Thứ Tự:</strong> <span id="out-stt">---</span></div>
+            <div><strong>Họ và Tên:</strong> <span id="out-name">---</span></div>
+            <div><strong>Lớp:</strong> <span id="out-class">---</span></div>
+            <div id="cooldown-notice" style="margin-top:10px; color:#e67e22; font-size:16px; font-weight:bold;"></div>
+        </div>
+        <div class="score-output" id="out-score">0.0</div>
+    </div>
+
+    <div class="explanation-container" id="explanation-section">
+        <h3 class="explanation-title">📌 Chi Tiết Các Ý Làm Chưa Đúng & Lời Giải Thích:</h3>
+        <div id="wrong-answers-list"></div>
+    </div>
+</div>
+
+<script>
+    // Ngân hàng 30 câu hỏi Đúng - Sai Tin học 11 kèm Lời giải thích chi tiết
+    const questionBank = [
+        {
+            text: "Câu 1: Phát biểu về hệ điều hành di động và hệ điều hành máy tính:",
+            sub: [
+                { id: "1a", text: "a) Ngoài máy tính cá nhân, các thiết bị điện gia dụng như Smart Tivi cũng có thể sử dụng các hệ điều hành như Android TV, WebOS, Tizen." },
+                { id: "1b", text: "b) Hệ điều hành Linux được phát triển từ năm 1991 dựa trên nền tảng của hệ điều hành Windows." },
+                { id: "1c", text: "c) Hệ điều hành Unix bao gồm ba thành phần chính là Kernel, Shell và Program." },
+                { id: "1d", text: "d) Hệ điều hành Linux được viết chủ yếu bằng ngôn ngữ lập trình Pascal." }
+            ],
+            ans: { "1a": "Đ", "1b": "S", "1c": "Đ", "1d": "S" },
+            explain: {
+                "1a": "Các dòng Smart Tivi hiện nay ứng dụng các hệ điều hành như Android TV, WebOS, Tizen...",
+                "1b": "Hệ điều hành Linux được phát triển dựa trên nền tảng của hệ điều hành UNIX chứ không phải Windows.",
+                "1c": "Unix được cấu tạo gồm ba phần cốt lõi: Kernel (nhân), Shell (vỏ/giao diện) và Program (các chương trình).",
+                "1d": "Hệ điều hành Linux được viết bằng ngôn ngữ lập trình C."
+            }
+        },
+        {
+            text: "Câu 2: Các phát biểu về công cụ tối ưu hệ thống trên Windows:",
+            sub: [
+                { id: "2a", text: "a) Việc phân mảnh tệp tin xảy ra khi các phần của tệp bị lưu rải rác trên nhiều vùng trống khác nhau của ổ đĩa cứng." },
+                { id: "2b", text: "b) Tiện ích Defragment (hợp mảnh) giúp gom các phần của tệp lại gần nhau trên các đường ghi (track) để tăng tốc độ đọc/ghi dữ liệu." },
+                { id: "2c", text: "c) Để kiểm tra và khắc phục lỗi mất liên kết tệp tin, người dùng chọn tiện ích Disk Cleanup trong thẻ Tools của cửa sổ Properties ổ đĩa." },
+                { id: "2d", text: "d) Tiện ích Disk Cleanup có vai trò dọn dẹp các tệp rác và tệp tạm thời để giải phóng dung lượng đĩa cứng." }
+            ],
+            ans: { "2a": "Đ", "2b": "Đ", "2c": "S", "2d": "Đ" },
+            explain: {
+                "2a": "Tệp tin bị phân mảnh là do các phần dữ liệu bị phân tán ở nhiều vùng trống trên ổ cứng sau thời gian dài sử dụng.",
+                "2b": "Quá trình hợp mảnh gom các phần tệp lại gần nhau trên đường ghi (track), làm giảm thời gian dịch chuyển đầu đọc của ổ cứng.",
+                "2c": "Để khắc phục lỗi cấu trúc tệp hoặc mất liên kết, ta sử dụng tiện ích Check disk (nút Check) trong thẻ Tools, không phải Disk Cleanup.",
+                "2d": "Disk Cleanup chuyên tìm và xóa tệp tạm, tệp rác không còn dùng để tăng dung lượng trống."
+            }
+        },
+        {
+            text: "Câu 3: Phát biểu về tính năng trên hệ điều hành di động và quản lý tệp:",
+            sub: [
+                { id: "3a", text: "a) Tiện ích Application Manager trong phần Cài đặt cho phép người dùng gỡ bỏ các ứng dụng không cần thiết khi bộ nhớ báo đầy." },
+                { id: "3b", text: "b) Phương thức sinh trắc học trên thiết bị di động như nhận dạng vân tay có tính bảo mật kém hơn mật khẩu chuỗi ký tự truyền thống." },
+                { id: "3c", text: "c) Nhược điểm lớn nhất của xác thực bằng khuôn mặt là người dùng phải ghi nhớ các chuỗi ký tự phức tạp." },
+                { id: "3d", text: "d) Khi nhấp chuột phải vào tệp tin trong File Explorer, bảng chọn lối tắt (shortcut menu) sẽ cung cấp các chức năng như Open, Cut, Copy, Delete, Rename." }
+            ],
+            ans: { "3a": "Đ", "3b": "S", "3c": "S", "3d": "Đ" },
+            explain: {
+                "3a": "Trình quản lý ứng dụng (Application Manager) hỗ trợ xem danh sách và gỡ ứng dụng để giải phóng bộ nhớ.",
+                "3b": "Phương thức sinh trắc học có độ bảo mật cao hơn vì đặc điểm sinh học của mỗi người là duy nhất, rất khó bị sao chép hay đoán mò.",
+                "3c": "Ưu điểm lớn nhất của sinh trắc học là tính tiện lợi vì không cần phải nhớ bất kỳ chuỗi ký tự phức tạp nào.",
+                "3d": "Bảng chọn chuột phải cung cấp đầy đủ các thao tác nhanh cơ bản để xử lý tệp."
+            }
+        },
+        {
+            text: "Câu 4: Nhận định về chỉ số FLOPS và hiệu suất máy tính cá nhân:",
+            sub: [
+                { id: "4a", text: "a) FLOPS là chỉ số đo số lượng phép tính số nguyên được thực hiện trong một giây." },
+                { id: "4b", text: "b) Các tác vụ thông thường trên máy tính cá nhân (PC) tập trung chủ yếu vào phép tính nguyên và xử lý chuỗi." },
+                { id: "4c", text: "c) FLOPS là chỉ số tiêu chuẩn hàng đầu được dùng phổ biến để đo hiệu năng của các máy tính cá nhân hiện đại." },
+                { id: "4d", text: "d) Hiệu suất PC hiện đại được đo lường chính xác hơn dựa trên tốc độ xử lý, dung lượng bộ nhớ và kích thước cache." }
+            ],
+            ans: { "4a": "S", "4b": "Đ", "4c": "S", "4d": "Đ" },
+            explain: {
+                "4a": "FLOPS (Floating Operation Per Second) đo số lượng phép tính dấu chấm động mỗi giây.",
+                "4b": "Các công việc văn phòng, giải trí cơ bản trên PC ít dùng phép tính dấu chấm động mà dùng phép tính nguyên và xử lý chuỗi.",
+                "4c": "Chỉ số FLOPS ít được dùng cho máy tính cá nhân.",
+                "4d": "Hiệu năng PC ngày nay được đánh giá chính xác hơn qua tốc độ vi xử lý, dung lượng RAM và bộ nhớ đệm cache."
+            }
+        },
+        {
+            text: "Câu 5: Nhận định về đặc điểm và công nghệ của máy quét ảnh:",
+            sub: [
+                { id: "5a", text: "a) Máy quét ảnh là thiết bị ra có chức năng hiển thị hình ảnh từ máy tính lên giấy." },
+                { id: "5b", text: "b) Cảm biến CCD cho chất lượng hình ảnh cao, dải màu tốt nhưng kích thước cồng kềnh và chi phí cao." },
+                { id: "5c", text: "c) Cảm biến CIS có ưu điểm nhỏ gọn, giá rẻ, tiết kiệm điện và cực kỳ thích hợp để quét các vật thể 3D." },
+                { id: "5d", text: "d) Công nghệ quét 3D được sử dụng để ghi lại hình dạng đối tượng thành tệp 3D phục vụ lưu trữ, chỉnh sửa hoặc in 3D." }
+            ],
+            ans: { "5a": "S", "5b": "Đ", "5c": "S", "5d": "Đ" },
+            explain: {
+                "5a": "Máy quét ảnh là thiết bị vào có chức năng quét thông tin hình ảnh bên ngoài và chuyển dữ liệu vào máy tính.",
+                "5b": "Cảm biến CCD có chất lượng ảnh vượt trội, ít nhiễu nhưng cồng kềnh và đắt tiền hơn.",
+                "5c": "Cảm biến CIS nhỏ gọn, rẻ nhưng không phù hợp để quét các vật thể 3D.",
+                "5d": "Quét 3D số hóa hình dạng vật thể thực thành mô hình 3D để lưu trữ hay in 3D."
+            }
+        },
+        {
+            text: "Câu 6: Các phát biểu liên quan đến máy chiếu và thông số kỹ thuật:",
+            sub: [
+                { id: "6a", text: "a) Máy chiếu là thiết bị vào dùng để thu hình ảnh từ màn chiếu vào máy tính." },
+                { id: "6b", text: "b) Công nghệ máy chiếu LCD phổ biến hoạt động dựa trên việc tách nguồn sáng trắng thành 3 màu cơ bản: Đỏ, Lục, Xanh dương." },
+                { id: "6c", text: "c) Cường độ sáng của máy chiếu thường được đo bằng đơn vị ANSI Lumens." },
+                { id: "6d", text: "d) Tuổi thọ bóng đèn và độ phân giải không ảnh hưởng đến chất lượng hay chi phí sử dụng máy chiếu." }
+            ],
+            ans: { "6a": "S", "6b": "Đ", "6c": "Đ", "6d": "S" },
+            explain: {
+                "6a": "Máy chiếu là thiết bị ra dùng để phóng to và hiển thị hình ảnh/văn bản lên màn chiếu.",
+                "6b": "Màn chiếu LCD tách ánh sáng trắng qua các tấm LCD độc lập đại diện cho 3 màu cơ bản RGB (Đỏ, Lục, Xanh dương).",
+                "6c": "ANSI Lumens là đơn vị chuẩn đo độ sáng của máy chiếu.",
+                "6d": "Độ phân giải (Full HD, 4K) và tuổi thọ bóng đèn là các thông số kỹ thuật quan trọng nhất quyết định độ nét và độ bền/chi phí vận hành."
+            }
+        },
+        {
+            text: "Câu 7: Nhận định về các chuẩn kết nối và cách thiết lập:",
+            sub: [
+                { id: "7a", text: "a) Cách thức kết nối các thiết bị số với máy tính hoàn toàn giống nhau cho mọi loại thiết bị." },
+                { id: "7b", text: "b) Mỗi thiết bị số đòi hỏi các cổng giao tiếp (USB, HDMI, VGA...) khác nhau do đặc thù về tốc độ truyền dữ liệu và cấu trúc phần cứng." },
+                { id: "7c", text: "c) Khi kết nối laptop với tivi qua cổng HDMI, ta sử dụng tổ hợp phím Windows + P để chọn chế độ hiển thị như Extend hoặc Duplicate." },
+                { id: "7d", text: "d) Mọi thiết bị số khi kết nối với máy tính bắt buộc phải sử dụng dây cáp không dây Bluetooth." }
+            ],
+            ans: { "7a": "S", "7b": "Đ", "7c": "Đ", "7d": "S" },
+            explain: {
+                "7a": "Cách kết nối phụ thuộc vào từng loại thiết bị, không thể giống nhau cho tất cả.",
+                "7b": "Do sự khác nhau về tốc độ truyền, tính di động mà mỗi thiết bị dùng chuẩn dây (USB, HDMI...) hoặc không dây khác nhau.",
+                "7c": "Phím tắt Windows + P cho phép chuyển nhanh chế độ chiếu màn hình trên hệ điều hành Windows.",
+                "7d": "Thiết bị có thể kết nối bằng dây cáp (USB, HDMI, VGA) hoặc không dây (Bluetooth, Wi-Fi)."
+            }
+        },
+        {
+            text: "Câu 8: Khi chọn mua màn hình máy tính, các phát biểu sau đây đúng hay sai?",
+            sub: [
+                { id: "8a", text: "a) Kích thước màn hình là yếu tố quyết định không gian hiển thị làm việc." },
+                { id: "8b", text: "b) Độ phân giải là số lượng điểm ảnh; độ phân giải càng cao thì hình ảnh hiển thị càng sắc nét." },
+                { id: "8c", text: "c) Tần số quét đo thời gian một điểm ảnh đổi màu, tính bằng miligiây." },
+                { id: "8d", text: "d) Thời gian phản hồi thể hiện tốc độ chuyển đổi màu của điểm ảnh, ảnh hưởng đến độ mượt khi chuyển động hình ảnh." }
+            ],
+            ans: { "8a": "Đ", "8b": "Đ", "8c": "S", "8d": "Đ" },
+            explain: {
+                "8a": "Kích thước (inch) xác định không gian làm việc thực tế của màn hình.",
+                "8b": "Độ phân giải chỉ số lượng điểm ảnh (pixels), quyết định độ nét của hình ảnh.",
+                "8c": "Tần số quét là số khung hình hiển thị trong một giây (Hz). Đo thời gian điểm ảnh đổi màu là thời gian phản hồi.",
+                "8d": "Thời gian phản hồi càng nhanh giúp hình ảnh chuyển động không bị nhòe hay bóng ma."
+            }
+        },
+        {
+            text: "Câu 9: Phát biểu về quy định của giấy phép phần mềm nguồn mở (GPL):",
+            sub: [
+                { id: "9a", text: "a) Người sửa đổi phần mềm nguồn mở có thể giấu đi thông tin các phần mình đã nâng cấp để bảo vệ bí mật kinh doanh." },
+                { id: "9b", text: "b) Giấy phép GPL yêu cầu công khai rõ ràng phần nào đã sửa và sửa như thế nào so với bản gốc nhằm minh bạch thông tin." },
+                { id: "9c", text: "c) Một phần mềm được cải tiến từ phần mềm nguồn mở theo giấy phép GPL bắt buộc cũng phải được mở theo giấy phép GPL." },
+                { id: "9d", text: "d) Giấy phép GPL cho phép nhà phát triển đóng gói và bán mã nguồn đã cải tiến thành phần mềm thương mại độc quyền." }
+            ],
+            ans: { "9a": "S", "9b": "Đ", "9c": "Đ", "9d": "S" },
+            explain: {
+                "9a": "Người sửa đổi phải công bố rõ ràng phần nào đã sửa và sửa thế nào để tôn trọng bản quyền tác giả.",
+                "9b": "Điều này đảm bảo sự minh bạch thông tin và tôn trọng tác giả gốc.",
+                "9c": "Tính chất kế thừa của GPL đảm bảo phần mềm cải tiến luôn giữ tính mở và miễn phí cho cộng đồng.",
+                "9d": "Giấy phép GPL ngăn chặn việc biến phần mềm nguồn mở thành phần mềm thương mại độc quyền đóng mã nguồn."
+            }
+        },
+        {
+            text: "Câu 10: Nhận định về đặc điểm của các loại phần mềm:",
+            sub: [
+                { id: "10a", text: "a) Microsoft Office là một ví dụ điển hình về phần mềm đóng gói thương mại." },
+                { id: "10b", text: "b) LibreOffice Writer là phần mềm thương mại có thể thay thế cho Microsoft Word." },
+                { id: "10c", text: "c) Ưu điểm nổi bật của phần mềm thương mại là có tính năng hoàn thiện, độ an toàn cao và dịch vụ hỗ trợ kỹ thuật chuyên nghiệp." },
+                { id: "10d", text: "d) Phần mềm đặt hàng là phần mềm được bán rộng rãi trên thị trường cho mọi đối tượng như các phần mềm đóng gói." }
+            ],
+            ans: { "10a": "Đ", "10b": "S", "10c": "Đ", "10d": "S" },
+            explain: {
+                "10a": "MS Office là phần mềm thương mại dạng đóng gói.",
+                "10b": "LibreOffice Writer là phần mềm nguồn mở miễn phí dùng để thay thế MS Word.",
+                "10c": "Phần mềm thương mại đầu tư mạnh về hỗ trợ kỹ thuật và độ hoàn thiện tính năng.",
+                "10d": "Phần mềm đặt hàng được thiết kế riêng theo nhu cầu của từng đơn vị cụ thể (ví dụ: Hệ thống quản lý học sinh của nhà trường)."
+            }
+        },
+        {
+            text: "Câu 11: Phát biểu về sự tương quan giữa các loại phần mềm và ngôn ngữ lập trình:",
+            sub: [
+                { id: "11a", text: "a) Sự phát triển mạnh mẽ của phần mềm nguồn mở sẽ làm cho thị trường phần mềm thương mại bị diệt vong hoàn toàn." },
+                { id: "11b", text: "b) Các doanh nghiệp vẫn cần phần mềm thương mại nhờ độ bảo mật cao và dịch vụ hỗ trợ kỹ thuật chuyên nghiệp." },
+                { id: "11c", text: "c) Vì ngôn ngữ Python không biên dịch sang mã máy mà ở dạng mã nguồn, mọi phần mềm viết bằng Python đều mặc nhiên là phần mềm nguồn mở." },
+                { id: "11d", text: "d) Việc một phần mềm có phải là nguồn mở hay không phụ thuộc vào giấy phép bản quyền do tác giả quyết định." }
+            ],
+            ans: { "11a": "S", "11b": "Đ", "11c": "S", "11d": "Đ" },
+            explain: {
+                "11a": "Thị trường phần mềm thương mại không suy giảm hay biến mất vì nhu cầu doanh nghiệp về tính chuyên nghiệp vẫn rất lớn.",
+                "11b": "Doanh nghiệp cần dịch vụ hỗ trợ và cam kết bảo mật từ các công ty phần mềm thương mại.",
+                "11c": "Ngôn ngữ lập trình không quyết định bản quyền; phần mềm Python vẫn có thể là phần mềm thương mại đóng mã.",
+                "11d": "Quyền quyết định phần mềm có mở hay không thuộc về giấy phép bản quyền của tác giả."
+            }
+        },
+        {
+            text: "Câu 12: Nhận định về phần mềm ứng dụng mạng và thiết bị chuyên dụng:",
+            sub: [
+                { id: "12a", text: "a) Ưu điểm của phần mềm chạy trên Internet là không tốn dung lượng cài đặt trên máy và truy cập được mọi lúc mọi nơi." },
+                { id: "12b", text: "b) Google Docs và Canva là các ví dụ về phần mềm trực tuyến." },
+                { id: "12c", text: "c) Phần mềm điều khiển tại các cây rút tiền tự động (ATM) là một phần mềm trực tuyến chạy trên trình duyệt web." },
+                { id: "12d", text: "d) Phần mềm máy ATM thuộc loại phần mềm nhúng chuyên dụng chạy nội bộ trên hệ thống máy ATM." }
+            ],
+            ans: { "12a": "Đ", "12b": "Đ", "12c": "S", "12d": "Đ" },
+            explain: {
+                "12a": "Phần mềm trực tuyến lưu trên Cloud, giúp tiết kiệm bộ nhớ máy cá nhân.",
+                "12b": "Đây là các công cụ xử lý văn bản, đồ họa chạy trực tiếp trên web.",
+                "12c": "Phần mềm máy ATM không phải phần mềm trực tuyến.",
+                "12d": "Đó là phần mềm nhúng chuyên dụng để đảm bảo an toàn giao dịch nội bộ."
+            }
+        },
+        {
+            text: "Câu 13: Các nhận định về dịch vụ lưu trữ trực tuyến:",
+            sub: [
+                { id: "13a", text: "a) Dịch vụ lưu trữ trực tuyến gọi là 'Lưu trữ đám mây' vì dữ liệu lưu trên các máy chủ kết nối Internet." },
+                { id: "13b", text: "b) Người dùng chỉ có thể truy cập tệp trên đám mây khi sử dụng đúng máy tính cá nhân ban đầu đã tải tệp lên." },
+                { id: "13c", text: "c) Dữ liệu lưu trên mây có thể truy cập mọi lúc, mọi nơi chỉ cần thiết bị có kết nối Internet." },
+                { id: "13d", text: "d) Khi lưu trữ đám mây, người dùng bắt buộc phải biết rõ chính xác vị trí địa lý của máy chủ chứa tệp." }
+            ],
+            ans: { "13a": "Đ", "13b": "S", "13c": "Đ", "13d": "S" },
+            explain: {
+                "13a": "Khái niệm 'đám mây' xuất phát từ việc dữ liệu lưu tập trung ở máy chủ nhà cung cấp qua Internet.",
+                "13b": "Người dùng có thể dùng bất kỳ thiết bị nào đăng nhập được tài khoản để truy cập tệp.",
+                "13c": "Tính di động là ưu điểm lớn nhất của lưu trữ đám mây.",
+                "13d": "Người dùng không cần biết dữ liệu thực sự nằm trên máy chủ vật lý nào, giống như nhìn thấy mây trên trời."
+            }
+        },
+        {
+            text: "Câu 14: Phát biểu về tính chất của dịch vụ lưu trữ Internet:",
+            sub: [
+                { id: "14a", text: "a) Lưu trữ trên đám mây giúp giảm thiểu nguy cơ mất dữ liệu khi thiết bị cá nhân bị hỏng hóc hay mất mát." },
+                { id: "14b", text: "b) Lưu trữ đám mây cho phép nhiều người cùng lúc chỉnh sửa và chia sẻ tài liệu trực tuyến." },
+                { id: "14c", text: "c) Nhược điểm của lưu trữ đám mây là hoàn toàn không bị ảnh hưởng khi mất kết nối Internet." },
+                { id: "14d", text: "d) Các nhà cung cấp dịch vụ đám mây luôn cung cấp dung lượng lưu trữ miễn phí vô hạn cho mọi người dùng." }
+            ],
+            ans: { "14a": "Đ", "14b": "Đ", "14c": "S", "14d": "S" },
+            explain: {
+                "14a": "Dữ liệu được sao lưu trên máy chủ nên thiết bị cá nhân hỏng vẫn còn bản lưu.",
+                "14b": "Hỗ trợ làm việc nhóm (collaborative working) vô cùng hiệu quả.",
+                "14c": "Nhược điểm chính của lưu trữ đám mây là phụ thuộc vào kết nối Internet; mất mạng sẽ khó hoặc không truy cập được.",
+                "14d": "Dung lượng miễn phí luôn bị giới hạn (ví dụ Google Drive cho 15GB, Dropbox cho 2GB)."
+            }
+        },
+        {
+            text: "Câu 15: So sánh giữa phương thức truyền dữ liệu bằng Bluetooth và qua Internet:",
+            sub: [
+                { id: "15a", text: "a) Truyền dữ liệu qua Bluetooth không yêu cầu thiết bị phải có kết nối Internet." },
+                { id: "15b", text: "b) Khoảng cách truyền dữ liệu của Bluetooth rất rộng, không bị giới hạn trong khoảng 10 mét." },
+                { id: "15c", text: "c) Tốc độ truyền tệp của Bluetooth thường nhanh hơn so với tốc độ truyền qua Internet cao tốc." },
+                { id: "15d", text: "d) Chia sẻ qua Internet thuận tiện khi gửi tệp từ xa hoặc gửi đồng thời cho nhiều người." }
+            ],
+            ans: { "15a": "Đ", "15b": "S", "15c": "S", "15d": "Đ" },
+            explain: {
+                "15a": "Bluetooth kết nối sóng ngắn trực tiếp giữa 2 thiết bị.",
+                "15b": "Phạm vi truyền dữ liệu Bluetooth bị giới hạn ngắn, chỉ khoảng 10m.",
+                "15c": "Tốc độ Bluetooth chậm hơn so với truyền qua mạng Internet.",
+                "15d": "Internet giải quyết tốt bài toán khoảng cách địa lý và chia sẻ số lượng lớn người nhận."
+            }
+        },
+        {
+            text: "Câu 16: Phát biểu về các dịch vụ lưu trữ trực tuyến Google Drive và Dropbox:",
+            sub: [
+                { id: "16a", text: "a) Google Drive cung cấp mức dung lượng miễn phí khởi đầu cho người dùng là 15GB." },
+                { id: "16b", text: "b) Dropbox cung cấp dung lượng miễn phí lớn hơn Google Drive, lên tới 50GB." },
+                { id: "16c", text: "c) Cả hai dịch vụ đều cho phép người dùng thực hiện thao tác tải tệp lên, tải tệp xuống và chia sẻ tệp." },
+                { id: "16d", text: "d) Google Drive thích hợp cho học sinh hơn vì tích hợp bộ công cụ như Google Docs, Sheets, Slides." }
+            ],
+            ans: { "16a": "Đ", "16b": "S", "16c": "Đ", "16d": "Đ" },
+            explain: {
+                "16a": "Google Drive cung cấp 15GB miễn phí.",
+                "16b": "Dung lượng miễn phí mặc định của Dropbox chỉ có 2GB, ít hơn nhiều so với Google Drive.",
+                "16c": "Cả 2 đều có tính năng cơ bản của lưu trữ đám mây.",
+                "16d": "Google Drive tích hợp sẵn hệ sinh thái văn phòng giúp học sinh học tập thuận tiện."
+            }
+        },
+        {
+            text: "Câu 17: Nhận định về việc sử dụng phần mềm RaiDrive để quản lý lưu trữ:",
+            sub: [
+                { id: "17a", text: "a) RaiDrive là phần mềm cho phép biến tài khoản đám mây (như Google Drive) thành một ổ đĩa ảo trên PC." },
+                { id: "17b", text: "b) Trong RaiDrive, nếu chọn mục 'Read-only' người dùng sẽ được quyền chỉnh sửa và xóa trực tiếp tệp trên ổ đĩa." },
+                { id: "17c", text: "c) Để RaiDrive liên kết với Google Drive, người dùng phải bấm Allow để cấp quyền truy cập quản lý tệp." },
+                { id: "17d", text: "d) Khi liên kết thành công qua RaiDrive, người dùng có thể xem phim trực tiếp trên Google Drive từ PC mà không cần tải tệp về." }
+            ],
+            ans: { "17a": "Đ", "17b": "S", "17c": "Đ", "17d": "Đ" },
+            explain: {
+                "17a": "RaiDrive giúp quản lý đám mây như một ổ đĩa cứng vật lý trên My Computer.",
+                "17b": "Chọn 'Read-only' nghĩa là ổ đĩa chỉ cho phép xem file, không được thao tác chỉnh sửa trực tiếp.",
+                "17c": "Bắt buộc phải xác thực quyền truy cập tài khoản Google.",
+                "17d": "RaiDrive cho phép truy xuất và streaming nội dung trực tiếp không cần download về máy."
+            }
+        },
+        {
+            text: "Câu 18: Các phát biểu về hệ điều hành Linux và phần mềm đồ họa:",
+            sub: [
+                { id: "18a", text: "a) Linux là một ví dụ điển hình về hệ điều hành mã nguồn mở." },
+                { id: "18b", text: "b) GIMP và Inkscape là hai phần mềm đồ họa nguồn mở nổi tiếng." },
+                { id: "18c", text: "c) Adobe Photoshop và Adobe Illustrator là các phần mềm đồ họa miễn phí mã nguồn mở." },
+                { id: "18d", text: "d) Hệ điều hành Unix chỉ bao gồm một thành phần duy nhất là Kernel." }
+            ],
+            ans: { "18a": "Đ", "18b": "Đ", "18c": "S", "18d": "S" },
+            explain: {
+                "18a": "Linux là hệ điều hành nguồn mở phát triển từ Unix.",
+                "18b": "GIMP và Inkscape là phần mềm xử lý ảnh và đồ họa vector nguồn mở.",
+                "18c": "Photoshop và Illustrator là phần mềm đồ họa thương mại bản quyền trả phí.",
+                "18d": "Hệ điều hành Unix gồm 3 thành phần: Kernel, Shell và Program."
+            }
+        },
+        {
+            text: "Câu 19: Nhận định về các thao tác bảo trì và đăng nhập trên thiết bị số:",
+            sub: [
+                { id: "19a", text: "a) Tệp tin bị phân mảnh làm cho đầu đọc ổ cứng phải di chuyển liên tục, làm giảm tốc độ máy tính." },
+                { id: "19b", text: "b) Tiện ích Check disk nằm trong thẻ Tools thuộc cửa sổ Properties của ổ đĩa." },
+                { id: "19c", text: "c) Sử dụng sinh trắc học như vân tay giúp tránh được nguy cơ bị đoán mò mật khẩu." },
+                { id: "19d", text: "d) Việc gỡ bỏ bớt ứng dụng không dùng đến sẽ làm gia tăng nguy cơ bộ nhớ bị đầy." }
+            ],
+            ans: { "19a": "Đ", "19b": "Đ", "19c": "Đ", "19d": "S" },
+            explain: {
+                "19a": "Đầu đọc dịch chuyển liên tục làm tăng thời gian truy xuất tệp.",
+                "19b": "Quy trình mở: Nhấp phải chuột ổ đĩa -> Properties -> Tools -> Check.",
+                "19c": "Tính duy nhất của vân tay giúp tăng độ bảo mật so với ký tự.",
+                "19d": "Gỡ bớt ứng dụng giúp giải phóng không gian lưu trữ, chống đầy bộ nhớ."
+            }
+        },
+        {
+            text: "Câu 20: Các phát biểu về thiết bị phần cứng:",
+            sub: [
+                { id: "20a", text: "a) Phép tính dấu chấm động là tiêu chuẩn đánh giá hiệu năng chính trên các máy tính cá nhân phục vụ văn phòng." },
+                { id: "20b", text: "b) Máy quét ảnh cảm biến CCD thường nhỏ gọn hơn máy quét cảm biến CIS." },
+                { id: "20c", text: "c) Cổng kết nối HDMI có thể truyền tải cả tín hiệu hình ảnh lẫn âm thanh từ laptop sang tivi." },
+                { id: "20d", text: "d) Độ tương phản và tỷ lệ chiếu (16:9, 4:3) là các thông số quan trọng của máy chiếu." }
+            ],
+            ans: { "20a": "S", "20b": "S", "20c": "Đ", "20d": "Đ" },
+            explain: {
+                "20a": "Tác vụ văn phòng dùng phép tính nguyên và xử lý chuỗi; chỉ số FLOPS (dấu chấm động) ít dùng.",
+                "20b": "Cảm biến CIS mới nhỏ gọn hơn, còn cảm biến CCD kích thước lớn và cồng kềnh.",
+                "20c": "Cáp HDMI truyền đồng thời cả video và audio chất lượng cao.",
+                "20d": "Đây là các chỉ số kỹ thuật ảnh hưởng trực tiếp đến hình ảnh hiển thị của máy chiếu."
+            }
+        },
+        {
+            text: "Câu 21: Nhận định về các thiết bị ngoại vi:",
+            sub: [
+                { id: "21a", text: "a) Tần số quét cao giúp chuyển động hình ảnh mượt mà hơn khi làm việc và chơi game." },
+                { id: "21b", text: "b) Máy quét ảnh là thiết bị ra dùng để in tài liệu từ máy tính ra giấy." },
+                { id: "21c", text: "c) Bật nguồn tivi và chọn đúng cổng vào (như HDMI 2) là bước bắt buộc khi kết nối trình chiếu từ máy tính." },
+                { id: "21d", text: "d) Thời gian phản hồi của màn hình được tính bằng giây (seconds); chỉ số này càng lớn càng tốt." }
+            ],
+            ans: { "21a": "Đ", "21b": "S", "21c": "Đ", "21d": "S" },
+            explain: {
+                "21a": "Tần số quét (Hz) cao tái hiện chuyển động hình ảnh rất mượt.",
+                "21b": "Máy quét (scanner) là thiết bị vào để nhập hình ảnh vào máy tính, không phải máy in.",
+                "21c": "Phải chọn đúng cổng nguồn vào trên Tivi/Máy chiếu để nhận tín hiệu.",
+                "21d": "Thời gian phản hồi tính bằng miligiây (ms), chỉ số này càng nhỏ mới càng tốt."
+            }
+        },
+        {
+            text: "Câu 22: Phát biểu về mô hình cung cấp phần mềm thương mại:",
+            sub: [
+                { id: "22a", text: "a) Phần mềm đóng gói được thiết kế phục vụ cho nhu cầu chung của nhiều người dùng khác nhau." },
+                { id: "22b", text: "b) Trang web quản lý học sinh của một trường học là ví dụ của phần mềm đóng gói." },
+                { id: "22c", text: "c) Phần mềm nguồn mở luôn thu phí bản quyền rất cao từ người sử dụng." },
+                { id: "22d", text: "d) Tự do sửa đổi và tùy biến mã nguồn là một ưu điểm lớn của phần mềm nguồn mở." }
+            ],
+            ans: { "22a": "Đ", "22b": "S", "22c": "S", "22d": "Đ" },
+            explain: {
+                "22a": "Phần mềm đóng gói (như MS Office) được sản xuất hàng loạt cho số đông.",
+                "22b": "Đó là phần mềm đặt hàng làm riêng theo yêu cầu của nhà trường.",
+                "22c": "Phần mềm nguồn mở thường miễn phí sử dụng.",
+                "22d": "Người dùng có quyền can thiệp vào mã nguồn để tùy chỉnh theo ý muốn."
+            }
+        },
+        {
+            text: "Câu 23: Nhận định về việc quản lý và sao lưu dữ liệu trên Internet:",
+            sub: [
+                { id: "23a", text: "a) Việc lưu trữ tệp trên Internet giúp tránh mất dữ liệu khi ổ cứng máy tính bị hỏng." },
+                { id: "23b", text: "b) Mọi dịch vụ đám mây đều có nguy cơ bị tấn công mạng hoặc lộ lọt dữ liệu." },
+                { id: "23c", text: "c) Để chia sẻ tệp cho người khác qua Google Drive, bắt buộc người nhận phải ở cùng phòng dưới 10 mét." },
+                { id: "23d", text: "d) Dropbox cung cấp tính năng đồng bộ hóa và quản lý tệp giữa nhiều thiết bị." }
+            ],
+            ans: { "23a": "Đ", "23b": "Đ", "23c": "S", "23d": "Đ" },
+            explain: {
+                "23a": "Dữ liệu an toàn trên đám mây khi phần cứng máy tính hư hỏng.",
+                "23b": "An ninh mạng luôn là nguy cơ nhược điểm lớn của dịch vụ Internet.",
+                "23c": "Giới hạn 10m là của Bluetooth; chia sẻ Google Drive qua Internet thực hiện không phụ thuộc khoảng cách.",
+                "23d": "Dropbox nổi tiếng với khả năng đồng bộ file mượt mà đa nền tảng."
+            }
+        },
+        {
+            text: "Câu 24: Các phát biểu về hệ điều hành di động và tiện ích quản lý:",
+            sub: [
+                { id: "24a", text: "a) Hệ điều hành Android TV được sử dụng rộng rãi trên các dòng Smart Tivi." },
+                { id: "24b", text: "b) Muốn mở bảng chọn shortcut menu cho một tệp tin, ta nháy chuột trái hai lần liên tiếp vào tệp đó." },
+                { id: "24c", text: "c) Bảng chọn shortcut menu cho phép tạo lối tắt (Create shortcut) cho tệp tin." },
+                { id: "24d", text: "d) Phương thức xác thực sinh trắc học giúp loại bỏ hoàn toàn việc phải nhớ các mật khẩu phức tạp." }
+            ],
+            ans: { "24a": "Đ", "24b": "S", "24c": "Đ", "24d": "Đ" },
+            explain: {
+                "24a": "Android TV là hệ điều hành gia dụng phổ biến trên TV thông minh.",
+                "24b": "Muốn xuất hiện bảng chọn shortcut menu ta phải nháy nút phải chuột.",
+                "24c": "Bảng chọn chuột phải chứa chức năng Create shortcut.",
+                "24d": "Sinh trắc học giúp xác thực nhanh qua đặc điểm cơ thể mà không cần nhớ chuỗi ký tự."
+            }
+        },
+        {
+            text: "Câu 25: Đặc điểm công nghệ của cảm biến CCD và CIS trên máy quét:",
+            sub: [
+                { id: "25a", text: "a) Cảm biến CCD giúp máy quét có kích thước rất mỏng nhẹ và tiết kiệm điện." },
+                { id: "25b", text: "b) Cảm biến CCD cho dải chuyển màu tốt và hình ảnh ít bị nhiễu." },
+                { id: "25c", text: "c) Cảm biến CIS có chi phí sản xuất cao hơn cảm biến CCD." },
+                { id: "25d", text: "d) Máy quét ứng dụng cảm biến CIS thích hợp để tạo ra máy quét thiết kế mỏng gọn." }
+            ],
+            ans: { "25a": "S", "25b": "Đ", "25c": "S", "25d": "Đ" },
+            explain: {
+                "25a": "Cảm biến CCD cồng kềnh, tiêu tốn điện năng hơn; mỏng nhẹ và tiết kiệm điện là cảm biến CIS.",
+                "25b": "CCD mang lại chất lượng hình ảnh cao và độ trung thực dải màu tốt nhất.",
+                "25c": "Cảm biến CIS có giá thành rẻ hơn CCD.",
+                "25d": "Cấu trúc nhỏ gọn của CIS giúp sản xuất các loại máy quét siêu mỏng."
+            }
+        },
+        {
+            text: "Câu 26: Các phát biểu về phần mềm thương mại và phần mềm trực tuyến:",
+            sub: [
+                { id: "26a", text: "a) Canva là phần mềm thiết kế đồ họa chạy trực tuyến qua mạng Internet." },
+                { id: "26b", text: "b) Phần mềm thương mại không cung cấp bất kỳ sự hỗ trợ kỹ thuật nào cho khách hàng." },
+                { id: "26c", text: "c) Phần mềm chạy trên Internet giúp người dùng truy cập làm việc từ xa rất tiện lợi." },
+                { id: "26d", text: "d) Mọi phần mềm nguồn mở đều bị cấm sử dụng trong các cơ quan, doanh nghiệp." }
+            ],
+            ans: { "26a": "Đ", "26b": "S", "26c": "Đ", "26d": "S" },
+            explain: {
+                "26a": "Canva là ứng dụng chạy trực tiếp trên nền tảng web.",
+                "26b": "Hỗ trợ kỹ thuật chuyên nghiệp là ưu điểm lớn nhất của phần mềm thương mại.",
+                "26c": "Chỉ cần kết nối mạng là có thể làm việc mọi lúc mọi nơi.",
+                "26d": "Phần mềm nguồn mở được khuyến khích sử dụng rộng rãi để tiết kiệm chi phí."
+            }
+        },
+        {
+            text: "Câu 27: Nhận định về phép tính dấu chấm động và hiệu suất xử lý:",
+            sub: [
+                { id: "27a", text: "a) FLOPS là viết tắt của cụm từ 'Floating Operation Per Second'." },
+                { id: "27b", text: "b) Máy tính cá nhân hiện đại không còn coi FLOPS là tiêu chuẩn đánh giá hiệu năng chính." },
+                { id: "27c", text: "c) Kích thước bộ nhớ đệm Cache không ảnh hưởng đến tốc độ thực thi của máy tính cá nhân." },
+                { id: "27d", text: "d) Máy tính cá nhân thường dùng nhiều phép tính dấu chấm động trong các công việc văn phòng hằng ngày." }
+            ],
+            ans: { "27a": "Đ", "27b": "Đ", "27c": "S", "27d": "S" },
+            explain: {
+                "27a": "Đúng định nghĩa tên gọi FLOPS.",
+                "27b": "PC ngày nay đo hiệu năng qua CPU, RAM, Cache chứ không dùng FLOPS làm thước đo chính.",
+                "27c": "Bộ nhớ Cache đóng vai trò cực kỳ quan trọng quyết định tốc độ xử lý của PC.",
+                "27d": "Tác vụ văn phòng ít dùng phép tính dấu chấm động."
+            }
+        },
+        {
+            text: "Câu 28: Các bước kết nối Google Drive vào máy tính bằng RaiDrive:",
+            sub: [
+                { id: "28a", text: "a) RaiDrive hỗ trợ liên kết tài khoản Google Drive thành ổ đĩa trên PC." },
+                { id: "28b", text: "b) Chọn 'Connect using different credentials' khi bạn chỉ muốn liên kết duy nhất 1 tài khoản cố định." },
+                { id: "28c", text: "c) Nhấn 'Allow' để cấp quyền cho RaiDrive quản lý các tệp trên đám mây." },
+                { id: "28d", text: "d) Sau khi liên kết thành công, các tệp Google Drive sẽ xuất hiện trong cửa sổ PC/My Computer như ổ đĩa cứng." }
+            ],
+            ans: { "28a": "Đ", "28b": "S", "28c": "Đ", "28d": "Đ" },
+            explain: {
+                "28a": "RaiDrive giúp ánh xạ tài khoản cloud thành ổ đĩa hệ thống.",
+                "28b": "Nút tick này dùng khi có nhu cầu liên kết nhiều tài khoản khác nhau.",
+                "28c": "Bước ủy quyền bắt buộc để phần mềm đọc/ghi dữ liệu.",
+                "28d": "Ổ đĩa mới xuất hiện trong My Computer cho phép thao tác như ổ cứng thật."
+            }
+        },
+        {
+            text: "Câu 29: Nhận định về các bước thao tác trên hệ điều hành Windows:",
+            sub: [
+                { id: "29a", text: "a) Chức năng Move to Trash / Delete trong shortcut menu dùng để xóa tệp tin." },
+                { id: "29b", text: "b) Tiện ích Optimize/Defragment giúp gom tệp tin phân mảnh lại gần nhau." },
+                { id: "29c", text: "c) Việc chọn đúng nguồn vào (Input Source) trên Tivi là không cần thiết khi nối cáp HDMI." },
+                { id: "29d", text: "d) Cáp VGA là cáp hiện đại duy nhất vừa truyền được hình ảnh Full HD vừa truyền được âm thanh chất lượng cao." }
+            ],
+            ans: { "29a": "Đ", "29b": "Đ", "29c": "S", "29d": "S" },
+            explain: {
+                "29a": "Đây là chức năng xóa tệp cơ bản.",
+                "29b": "Defragment tối ưu cấu trúc lưu trữ trên track đĩa.",
+                "29c": "Phải chọn đúng nguồn vào (ví dụ: HDMI 1, HDMI 2) thì Tivi mới hiển thị hình ảnh từ máy tính.",
+                "29d": "Cáp VGA là chuẩn cũ chỉ truyền hình ảnh (không truyền âm thanh). Chuẩn truyền cả ảnh và tiếng là HDMI."
+            }
+        },
+        {
+            text: "Câu 30: Các nhận định chung về công nghệ thông tin:",
+            sub: [
+                { id: "30a", text: "a) Linux được phát triển bằng ngôn ngữ C từ năm 1991." },
+                { id: "30b", text: "b) Mọi phần mềm chạy trên Internet đều yêu cầu người dùng phải trả phí dịch vụ hàng tháng." },
+                { id: "30c", text: "c) Dịch vụ Google Drive cho phép chia sẻ tệp với nhiều chế độ quyền truy cập khác nhau." },
+                { id: "30d", text: "d) Mở rộng bộ nhớ cá nhân là ưu điểm chính của phần mềm nhúng tại trạm ATM." }
+            ],
+            ans: { "30a": "Đ", "30b": "S", "30c": "Đ", "30d": "S" },
+            explain: {
+                "30a": "Đúng mốc thời gian và ngôn ngữ phát triển hệ điều hành Linux.",
+                "30b": "Rất nhiều phần mềm trực tuyến cung cấp bản dùng miễn phí (ví dụ: Google Docs, Canva...).",
+                "30c": "Google Drive cung cấp các chế độ chia sẻ đa dạng (Xem, Nhận xét, Chỉnh sửa).",
+                "30d": "Phần mềm nhúng máy ATM dùng để thực hiện giao dịch ngân hàng an toàn, không phải để mở rộng bộ nhớ máy cá nhân."
+            }
+        }
+    ];
+
+    let selectedQuestions = [];
+    let isExamRunning = false;
+    let timerInterval;
+    const cooldownDuration = 20 * 60 * 1000; // 20 phút thành miliseconds
+
+    window.onload = function() {
+        // Tự động lấy thông tin từ master_exam_data
+        const masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+        if (masterData && masterData.name && masterData.className && masterData.stt) {
+            document.getElementById('student-name').value = masterData.name;
+            document.getElementById('student-class').value = masterData.className;
+            document.getElementById('student-stt').value = masterData.stt;
+        }
+
+        checkCooldown();
+        
+        const passInput = document.getElementById('teacher-pass-input');
+        if (passInput) {
+            passInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitTeacherPass();
+                }
+            });
+        }
+    };
+
+    function checkCooldown() {
+        const lastSubmitTime = localStorage.getItem('quiz_last_submit_time');
+        if (lastSubmitTime) {
+            const timePassed = Date.now() - parseInt(lastSubmitTime);
+            if (timePassed < cooldownDuration) {
+                const timeRemaining = cooldownDuration - timePassed;
+                const minutes = Math.floor(timeRemaining / 60000);
+                const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                
+                document.getElementById('btn-start').disabled = true;
+                document.getElementById('btn-start').style.backgroundColor = '#bdc3c7';
+                document.getElementById('btn-start').innerText = "Đang trong thời gian chờ làm lại...";
+                
+                const coolMsg = document.getElementById('cooldown-message');
+                coolMsg.style.display = 'block';
+                coolMsg.innerHTML = `Bạn đã nộp bài. Hãy đợi hoặc dùng mã GV để mở khóa: <span style='font-size: 18px;'>${minutes} phút ${seconds} giây</span>`;
+                
+                setTimeout(checkCooldown, 1000);
+                return true;
+            }
+        }
+        document.getElementById('btn-start').disabled = false;
+        document.getElementById('btn-start').style.backgroundColor = '#3498db';
+        document.getElementById('btn-start').innerText = "Bắt Đầu Làm Bài";
+        document.getElementById('cooldown-message').style.display = 'none';
+        return false;
+    }
+
+    function openTeacherModal() {
+        document.getElementById('teacher-pass-input').value = '';
+        document.getElementById('teacher-modal').style.display = 'flex';
+        document.getElementById('teacher-pass-input').focus();
+    }
+
+    function closeTeacherModal() {
+        document.getElementById('teacher-modal').style.display = 'none';
+    }
+
+    function submitTeacherPass() {
+        const pass = document.getElementById('teacher-pass-input').value;
+        if (pass === "@COMUATHU123") {
+            localStorage.removeItem('quiz_last_submit_time');
+            closeTeacherModal();
+            alert("Mở khóa thành công! Hệ thống đã khôi phục trạng thái làm bài mới.");
+            location.reload();
+        } else {
+            alert("Mật khẩu không chính xác!");
+            document.getElementById('teacher-pass-input').value = '';
+            document.getElementById('teacher-pass-input').focus();
+        }
+    }
+
+    function startQuiz() {
+        if (checkCooldown()) return;
+
+        const stt = document.getElementById('student-stt').value.trim();
+        const name = document.getElementById('student-name').value.trim();
+        const sClass = document.getElementById('student-class').value.trim();
+
+        if (!stt || !name || !sClass) {
+            alert("Vui lòng điền đầy đủ Số thứ tự, Họ tên và Lớp trước khi làm bài!");
+            return;
+        }
+
+        let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+        masterData.name = name;
+        masterData.className = sClass;
+        masterData.stt = stt;
+        masterData.step = 2;
+        localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+        try {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+        } catch (err) {
+            console.log("Không thể bật chế độ toàn màn hình:", err);
+        }
+
+        isExamRunning = true;
+
+        const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+        selectedQuestions = shuffled.slice(0, 2);
+
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+
+        selectedQuestions.forEach((q) => {
+            let card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `<h3 style="margin-top:0;">${q.text}</h3>`;
+            
+            q.sub.forEach(s => {
+                let subDiv = document.createElement('div');
+                subDiv.className = 'sub-question';
+                subDiv.innerHTML = `
+                    <span>${s.text}</span>
+                    <div class="options">
+                        <label><input type="radio" name="${s.id}" value="Đ"> Đúng</label>
+                        <label><input type="radio" name="${s.id}" value="S"> Sai</label>
+                    </div>
+                `;
+                card.appendChild(subDiv);
+            });
+            container.appendChild(card);
+        });
+
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'block';
+
+        let totalSeconds = 4 * 60;
+        timerInterval = setInterval(() => {
+            totalSeconds--;
+            let mins = Math.floor(totalSeconds / 60);
+            let secs = totalSeconds % 60;
+            document.getElementById('time-left').innerText = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                finishQuiz(false);
+            }
+        }, 1000);
+    }
+
+    function finishQuiz(isCheating = false) {
+        if (!isExamRunning) return;
+        isExamRunning = false;
+        clearInterval(timerInterval);
+
+        localStorage.setItem('quiz_last_submit_time', Date.now().toString());
+
+        const stt = document.getElementById('student-stt').value;
+        const name = document.getElementById('student-name').value;
+        const sClass = document.getElementById('student-class').value;
+
+        let score = 0;
+        let wrongListHTML = '';
+        let wrongCount = 0;
+
+        selectedQuestions.forEach(q => {
+            q.sub.forEach(s => {
+                const radios = document.getElementsByName(s.id);
+                let userAns = "Chưa chọn";
+                for (const r of radios) {
+                    if (r.checked) {
+                        userAns = r.value;
+                        break;
+                    }
+                }
+
+                if (!isCheating && userAns === q.ans[s.id]) {
+                    score += 0.25;
+                } else {
+                    wrongCount++;
+                    const correctText = q.ans[s.id] === 'Đ' ? 'Đúng' : 'Sai';
+                    const userText = userAns === 'Chưa chọn' ? 'Chưa chọn' : (userAns === 'Đ' ? 'Đúng' : 'Sai');
+                    
+                    wrongListHTML += `
+                        <div class="wrong-item">
+                            <div class="wrong-item-header">${q.text.split(':')[0]} - Ý: ${s.text}</div>
+                            <div class="wrong-item-details">
+                                ❌ Bạn chọn: <strong style="color: #c0392b;">${userText}</strong> | 
+                                 Đáp án chính xác: <strong style="color: #27ae60;">${correctText}</strong>
+                            </div>
+                            <div class="wrong-item-exp">
+                                💡 <strong>Giải thích:</strong> ${q.explain[s.id]}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        document.getElementById('out-stt').innerText = stt;
+        document.getElementById('out-name').innerText = name;
+        document.getElementById('out-class').innerText = sClass;
+        document.getElementById('out-score').innerText = score.toFixed(2);
+
+        // Lưu điểm phần 2 và chuyển sang phần 3
+        let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+        masterData.p2 = score;
+        masterData.step = 3;
+        localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+        setTimeout(() => {
+            const lockScreen = document.getElementById('lock-screen');
+            if (lockScreen && !document.getElementById('btn-goto-p3')) {
+                const div = document.createElement('div');
+                div.innerHTML = `<button id="btn-goto-p3" onclick="parent.postMessage({examGo:'3'},'*')" style="background-color:#2563eb; color:white; padding:14px; font-size:1.1rem; font-weight:bold; border:none; border-radius:6px; cursor:pointer; width:100%; margin-top: 25px; box-shadow: 0 4px 10px rgba(37,99,235,0.3);">👉 BẤM VÀO ĐÂY ĐỂ TIẾP TỤC LÀM PHẦN 3 (TỰ LUẬN AI)</button>`;
+                lockScreen.appendChild(div);
+            }
+        }, 100);
+
+        const wrongAnswersContainer = document.getElementById('wrong-answers-list');
+        if (isCheating) {
+            document.getElementById('cheat-warning').style.display = 'block';
+            wrongAnswersContainer.innerHTML = `<p style="color: #7f8c8d;">Hệ thống không hiển thị chi tiết câu sai do bài thi bị hủy vì gian lận.</p>`;
+        } else if (wrongCount === 0) {
+            wrongAnswersContainer.innerHTML = `<div style="color: #27ae60; font-weight: bold; font-size: 18px;">🎉 Xuất sắc! Bạn đã trả lời chính xác tất cả các câu hỏi.</div>`;
+        } else {
+            wrongAnswersContainer.innerHTML = wrongListHTML;
+        }
+
+        document.getElementById('cooldown-notice').innerText = "Hệ thống đã khóa bài thi. Bạn có thể làm lại bài thi (với đề mới ngẫu nhiên) sau 20 phút nữa.";
+        document.getElementById('lock-screen').style.display = 'block';
+
+        try {
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        } catch (e) {}
+        
+        checkCooldown();
+    }
+
+    // Chống gian lận
+    window.addEventListener('keydown', function (e) {
+        if (!isExamRunning) return;
+        if (
+            e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) || 
+            (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's'))
+        ) {
+            e.preventDefault();
+            finishQuiz(true);
+        }
+    });
+
+    window.addEventListener('contextmenu', function (e) {
+        if (isExamRunning) {
+            e.preventDefault();
+            finishQuiz(true);
+        }
+    });
+
+    let threshold = 160;
+    window.addEventListener('resize', function() {
+        if (!isExamRunning) return;
+        if ((window.outerWidth - window.innerWidth > threshold) || (window.outerHeight - window.innerHeight > threshold)) {
+            finishQuiz(true);
+        }
+    });
+
+    document.addEventListener('fullscreenchange', function() {
+        if (isExamRunning && !document.fullscreenElement) {
+            finishQuiz(true);
+        }
+    });
+<\/script>
+
+</body>
+</html></script>
+<script type="text/plain" id="tpl-3"><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Chấm Bài Tự Luận AI - Tin Học</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none; /* Prevent text selection */
+            -webkit-user-select: none;
+        }
+        textarea {
+            resize: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white shadow-md py-4 px-6 text-center">
+        <h1 class="text-xl md:text-2xl font-bold tracking-wide flex items-center justify-center gap-2">
+            <i class="fa-solid fa-graduation-cap"></i> HỆ THỐNG KIỂM TRA TỰ LUẬN TIN HỌC
+        </h1>
+        <p class="text-xs md:text-sm text-indigo-200 mt-1">Chấm bài tự động bằng Trí tuệ nhân tạo (AI)</p>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-6 max-w-3xl flex-grow">
+
+        <!-- 1. LOGIN / SETUP SCREEN -->
+        <div id="login-screen" class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Thông Tin Thí Sinh</h2>
+                <p class="text-sm text-slate-500 mt-1">Vui lòng điền đầy đủ thông tin để bắt đầu làm bài</p>
+            </div>
+
+            <form id="login-form" onsubmit="startExam(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Họ và Tên <span class="text-red-500">*</span></label>
+                    <input type="text" id="student-name" required placeholder="Nguyễn Văn A" 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Số Thứ Tự (STT) <span class="text-red-500">*</span></label>
+                        <input type="number" id="student-stt" min="1" required placeholder="01" 
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Lớp <span class="text-red-500">*</span></label>
+                        <select id="student-class" required 
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            <option value="" disabled selected>-- Chọn lớp của bạn --</option>
+                            <option value="10C03">10C03</option>
+                            <option value="10C07">10C07</option>
+                            <option value="10C010">10C010</option>
+                            <option value="10C12">10C12</option>
+                            <option value="10C14">10C14</option>
+                            <option value="10C16">10C16</option>
+                            <option value="11B01">11B01</option>
+                            <option value="11B06">11B06</option>
+                            <option value="11B09">11B09</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-xs md:text-sm space-y-1">
+                    <p class="font-bold flex items-center gap-1.0"><i class="fa-solid fa-triangle-exclamation text-amber-600"></i> QUY ĐỊNH CHỐNG GIAN LẬN:</p>
+                    <ul class="list-disc list-inside space-y-1 text-amber-700 pl-1">
+                        <li>Khi bấm bắt đầu, màn hình sẽ tự động bật <b>Full Screen (Toàn màn hình)</b>.</li>
+                        <li><b>KHÔNG được thoát Full Screen</b>, chuyển sang tab khác hoặc ứng dụng khác.</li>
+                        <li><b>KHÔNG được dán (Paste)</b> nội dung từ bên ngoài vào ô trả lời.</li>
+                        <li>Mọi vi phạm hoặc nộp bài sẽ <b>khóa hệ thống 20 phút</b> không cho làm lại.</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition duration-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i> BẮT ĐẦU LÀM BÀI
+                </button>
+            </form>
+        </div>
+
+        <!-- 2. EXAM SCREEN -->
+        <div id="exam-screen" class="hidden bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div class="flex flex-wrap justify-between items-center border-b border-slate-200 pb-4 mb-6 gap-2">
+                <div>
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Thí sinh</span>
+                    <h3 id="display-student-info" class="text-lg font-bold text-slate-800">Nguyễn Văn A - STT: 01 - Lớp: 10C03</h3>
+                </div>
+                <div class="bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-indigo-500"></i> Chế độ chống gian lận: ON
+                </div>
+            </div>
+
+            <!-- Questions Container -->
+            <div id="questions-container" class="space-y-8">
+                <!-- Question 1 -->
+                <div class="question-block border border-slate-200 rounded-xl p-5 bg-slate-50">
+                    <div class="flex items-center gap-2 text-indigo-700 font-bold mb-2">
+                        <span class="bg-indigo-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-sm">C1</span>
+                        <h4>Câu hỏi 1 (Tối đa 1.0 điểm)</h4>
+                    </div>
+                    <p id="q1-title" class="text-slate-800 font-medium mb-3 text-base md:text-lg"></p>
+                    <textarea id="q1-answer" rows="5" placeholder="Gõ câu trả lời của bạn tại đây (Tuyệt đối không paste)..." 
+                        class="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white font-normal text-slate-800"
+                        onpaste="preventPaste(event)" oncontextmenu="return false;"></textarea>
+                    <div class="text-right text-xs text-slate-400 mt-1">Lưu ý: Không cho phép dán (Paste) nội dung</div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="question-block border border-slate-200 rounded-xl p-5 bg-slate-50">
+                    <div class="flex items-center gap-2 text-indigo-700 font-bold mb-2">
+                        <span class="bg-indigo-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-sm">C2</span>
+                        <h4>Câu hỏi 2 (Tối đa 1.0 điểm)</h4>
+                    </div>
+                    <p id="q2-title" class="text-slate-800 font-medium mb-3 text-base md:text-lg"></p>
+                    <textarea id="q2-answer" rows="5" placeholder="Gõ câu trả lời của bạn tại đây (Tuyệt đối không paste)..." 
+                        class="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white font-normal text-slate-800"
+                        onpaste="preventPaste(event)" oncontextmenu="return false;"></textarea>
+                    <div class="text-right text-xs text-slate-400 mt-1">Lưu ý: Không cho phép dán (Paste) nội dung</div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-8">
+                <button onclick="confirmSubmit()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl transition duration-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> NỘP BÀI VÀ CHẤM ĐIỂM
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. LOADING SCREEN -->
+        <div id="loading-screen" class="hidden bg-white rounded-2xl shadow-xl p-8 text-center my-12">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-indigo-600 border-t-transparent mb-4"></div>
+            <h3 class="text-xl font-bold text-slate-800">AI ĐANG CHẤM BÀI TỰ LUẬN...</h3>
+            <p class="text-slate-500 text-sm mt-2">Hệ thống đang so trùng ý và phân tích nội dung câu trả lời của bạn. Vui lòng chờ trong giây lát!</p>
+        </div>
+
+        <!-- 4. RESULT SCREEN -->
+        <div id="result-screen" class="hidden bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div class="text-center border-b border-slate-200 pb-6 mb-6">
+                <div id="result-badge" class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 text-2xl mb-3">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">KẾT QUẢ KIỂM TRA TỰ LUẬN</h2>
+                <p id="result-student-info" class="text-slate-500 text-sm mt-1"></p>
+
+                <!-- Cheat Warning Banner if applicable -->
+                <div id="cheat-flag-banner" class="hidden mt-3 bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-xl text-sm font-semibold">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Phát hiện vi phạm quy chế (Thoát Fullscreen / Gian lận)! Bài thi bị thu khẩn cấp.
+                </div>
+
+                <!-- Final Score Display -->
+                <div class="mt-6 bg-slate-50 border border-slate-200 rounded-2xl p-6 inline-block min-w-[240px]">
+                    <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Điểm tổng kết</span>
+                    <div class="text-5xl font-extrabold text-indigo-600 mt-1" id="final-score">0.0 / 2.0</div>
+                    <div class="text-xs text-slate-500 mt-2">(Quy tắc làm tròn: .3 | .5 | .8)</div>
+                </div>
+            </div>
+
+            <!-- Detailed Evaluation Feedback -->
+            <div class="space-y-6">
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-indigo-600"></i> CHI TIẾT ĐÁNH GIÁ TỪ AI
+                </h3>
+
+                <div id="evaluation-details" class="space-y-6">
+                    <!-- Dynamic evaluation results inserted here -->
+                </div>
+            </div>
+
+            <!-- Lock Notice -->
+            <div class="mt-8 pt-6 border-t border-slate-200 text-center">
+                <p class="text-xs text-slate-500">
+                    <i class="fa-solid fa-lock text-red-500"></i> Hệ thống đã khóa kết quả và hạn chế làm lại trong vòng 20 phút. Không thể quay lại màn hình đăng nhập.
+                </p>
+            </div>
+        </div>
+
+        <!-- 5. LOCK / COOLDOWN SCREEN -->
+        <div id="lock-screen" class="hidden bg-white rounded-2xl shadow-xl p-8 text-center my-12 space-y-4">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-600 text-2xl mb-2">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-800">HỆ THỐNG ĐANG KHÓA BÀI THI</h3>
+            <p class="text-slate-600 text-sm">Bạn đã hoàn thành bài thi hoặc hệ thống ghi nhận phiên làm bài trước đó. Vui lòng đợi hết thời gian khóa để làm lại hoặc liên hệ giáo viên.</p>
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 inline-block">
+                <span class="text-xs uppercase font-bold text-slate-400">Thời gian mở khóa còn lại</span>
+                <div id="countdown-timer" class="text-3xl font-extrabold text-red-600 mt-1">20:00</div>
+            </div>
+            <div class="pt-4 border-t border-slate-200">
+                <button onclick="teacherUnlockPrompt()" class="text-xs text-indigo-600 hover:underline">
+                    <i class="fa-solid fa-key"></i> Giáo viên mở khóa / Reset hệ thống
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-400 text-xs text-center py-4 border-t border-slate-700">
+        <p>© 2026 Hệ Thống Chấm Tự Luận AI Tin Học 10. Bảo lưu mọi quyền.</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // 9 Class API Mapping updated to the specified classes
+        const CLASS_API_MAP = {}; // ĐÃ GỠ API KEY khỏi mã nguồn
+        function getGeminiKey() { try { return localStorage.getItem('gemini_api_key') || ''; } catch(e) { return ''; } }
+
+        // Encoded Teacher Password: @COMUATHU123
+        const SECRET_CODES = [64, 67, 79, 77, 85, 65, 84, 72, 85, 49, 50, 51];
+        function getSecretPass() {
+            return SECRET_CODES.map(c => String.fromCharCode(c)).join('');
+        }
+
+        // Check lock status on page load & LẤY THÔNG TIN TỪ FILE INDEX (master_exam_data)
+        window.addEventListener('DOMContentLoaded', () => {
+            const masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+            if (masterData) {
+                if (masterData.name) document.getElementById('student-name').value = masterData.name;
+                if (masterData.stt) document.getElementById('student-stt').value = masterData.stt;
+                if (masterData.className) {
+                    const classSelect = document.getElementById('student-class');
+                    classSelect.value = masterData.className;
+                }
+            }
+
+            checkLockStatus();
+        });
+
+        function checkLockStatus() {
+            const lockUntil = localStorage.getItem('exam_lock_until');
+            if (lockUntil) {
+                const now = Date.now();
+                if (now < parseInt(lockUntil)) {
+                    showLockScreen(parseInt(lockUntil));
+                } else {
+                    localStorage.removeItem('exam_lock_until');
+                }
+            }
+        }
+
+        let countdownInterval = null;
+        function showLockScreen(lockUntilTimestamp) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('exam-screen').classList.add('hidden');
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('lock-screen').classList.remove('hidden');
+
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            countdownInterval = setInterval(() => {
+                const remaining = lockUntilTimestamp - Date.now();
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    localStorage.removeItem('exam_lock_until');
+                    location.reload();
+                } else {
+                    const mins = Math.floor(remaining / 60000);
+                    const secs = Math.floor((remaining % 60000) / 1000);
+                    document.getElementById('countdown-timer').innerText = 
+                        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        function teacherUnlockPrompt() {
+            const pwd = prompt("Nhập mật khẩu giáo viên để mở khóa:");
+            if (pwd === getSecretPass()) {
+                localStorage.removeItem('exam_lock_until');
+                alert("Mở khóa thành công!");
+                location.reload();
+            } else if (pwd !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        // 1. NGÂN HÀNG CÂU HỎI TỰ LUẬN ĐƯỢC CẬP NHẬT TỪ FILE WORD (15 câu)
+        const QUESTION_BANK = [
+            {
+                id: 1,
+                title: "Em hãy tìm hiểu xem ngoài máy tính còn có thiết bị điện gia dụng nào sử dụng hệ điều hành không.",
+                keyPoints: [
+                    "Các dòng Smart Tivi (ti vi thông minh)",
+                    "Sử dụng các hệ điều hành như: Android TV, WebOS, Tizen,..."
+                ]
+            },
+            {
+                id: 2,
+                title: "Khi sử dụng máy tính cá nhân trong một thời gian dài, các tệp tin thường bị phân mảnh (lưu rải rác trên các vùng trống khác nhau của ổ đĩa cứng). Tại sao việc thực hiện tiện ích hợp mảnh (Optimize/Defragment) lại giúp máy tính chạy mượt mà và tăng tốc độ truy cập dữ liệu hơn?",
+                keyPoints: [
+                    "Gom các phần của tệp tin lại gần nhau trên các đường ghi (track)",
+                    "Giảm thời gian đầu đọc của ổ cứng phải dịch chuyển liên tục",
+                    "Tăng tốc độ đọc/ghi dữ liệu của hệ thống"
+                ]
+            },
+            {
+                id: 3,
+                title: "Trong quá trình sử dụng hệ điều hành Windows, đôi khi bạn gặp tình trạng tệp tin bị lỗi mất liên kết hoặc ổ đĩa bị lỗi cấu trúc tệp. Tiện ích nào trong hệ điều hành có chức năng kiểm tra và khắc phục lỗi này, và nó nằm ở đâu?",
+                keyPoints: [
+                    "Tiện ích Check disk (kiểm tra lỗi đĩa)",
+                    "Cách mở: Nháy nút phải chuột vào ổ đĩa muốn kiểm tra -> chọn Properties",
+                    "Chọn trang Tools -> nhấn nút Check"
+                ]
+            },
+            {
+                id: 4,
+                title: "Ngoài tiện ích hợp mảnh (Optimize) và kiểm tra lỗi (Check), trong thẻ Tools của cửa sổ Properties còn có nút lệnh của tiện ích Disk Cleanup (dọn dĩa). Theo em, tiện ích này có vai trò gì đối với máy tính cá nhân?",
+                keyPoints: [
+                    "Tìm kiếm và xóa bỏ các tệp tin rác, tệp tạm thời không còn sử dụng",
+                    "Giải phóng dung lượng trống cho ổ đĩa, giúp máy tính hoạt động tối ưu hơn"
+                ]
+            },
+            {
+                id: 5,
+                title: "Các thiết bị di động (như điện thoại thông minh, máy tính bảng) hiện nay đều tích hợp hệ điều hành với các tiện ích cá nhân rất phong phú. Khi thiết bị di động của bạn báo bộ nhớ đầy do có quá nhiều ứng dụng ít khi dùng đến, em cần sử dụng tiện ích nào của hệ điều hành di động để giải quyết nhanh chóng?",
+                keyPoints: [
+                    "Sử dụng tiện ích Quản lí ứng dụng (Application Manager trong phần Cài đặt)",
+                    "Xem danh sách ứng dụng đã cài đặt và chọn gỡ bỏ các ứng dụng không cần thiết"
+                ]
+            },
+            {
+                id: 6,
+                title: "Bên cạnh phương pháp đăng nhập bằng mật khẩu truyền thống, các thiết bị di động hiện nay thường hỗ trợ thêm các phương thức sinh trắc học như nhận dạng vân tay hoặc nhận dạng khuôn mặt. Theo em, điểm mạnh lớn nhất của các phương thức này so với mật khẩu thông thường là gì?",
+                keyPoints: [
+                    "Tính tiện lợi: không cần ghi nhớ chuỗi kí tự phức tạp",
+                    "Tính bảo mật cao hơn vì đặc điểm sinh trắc học của mỗi cá nhân là duy nhất, rất khó bị sao chép hay đoán mò"
+                ]
+            },
+            {
+                id: 7,
+                title: "Cho ví dụ về phần mềm đóng gói và phần mềm đặt hàng. Ưu điểm của phần mềm thương mại là gì?",
+                keyPoints: [
+                    "Ví dụ phần mềm đóng gói: Microsoft Office (hoặc phần mềm diệt virus...)",
+                    "Ví dụ phần mềm đặt hàng: Website/hệ thống phần mềm quản lý học sinh của nhà trường",
+                    "Ưu điểm phần mềm thương mại: Tính năng hoàn thiện, độ an toàn cao và có sự hỗ trợ kỹ thuật chuyên nghiệp"
+                ]
+            },
+            {
+                id: 8,
+                title: "Cho ví dụ về một phần mềm thương mại và một phần mềm nguồn mở có thể thay thế. Ưu điểm của phần mềm nguồn mở là gì?",
+                keyPoints: [
+                    "Ví dụ thay thế: Microsoft Word (thương mại) có thể thay thế bằng LibreOffice Writer (nguồn mở)",
+                    "Ưu điểm phần mềm nguồn mở: Miễn phí sử dụng, người dùng có quyền tự do sửa đổi và tùy biến mã nguồn"
+                ]
+            },
+            {
+                id: 9,
+                title: "Phần mềm ở các trạm ATM (rút tiền tự động) có phải là phần mềm trực tuyến không?",
+                keyPoints: [
+                    "Không phải phần mềm trực tuyến",
+                    "Đây là phần mềm nhúng chuyên dụng chạy nội bộ trên hệ thống máy ATM"
+                ]
+            },
+            {
+                id: 10,
+                title: "Em hãy tìm trên Internet và cho biết tên một số phần mềm đồ hoạ nguồn mở và một số phần mềm đồ hoạ thương mại.",
+                keyPoints: [
+                    "Phần mềm đồ họa nguồn mở: GIMP, Inkscape",
+                    "Phần mềm đồ họa thương mại: Adobe Photoshop, Adobe Illustrator"
+                ]
+            },
+            {
+                id: 11,
+                title: "Nói chung, các môi trường lập trình trên ngôn ngữ Python đều không có chức năng biên dịch để chuyển mã nguồn thành mã máy. Các chương trình Python đều ở dạng mã nguồn. Liệu có thể coi mọi phần mềm viết bằng Python đều là phần mềm nguồn mở hay không?",
+                keyPoints: [
+                    "Không thể coi mọi phần mềm viết bằng Python đều là phần mềm nguồn mở",
+                    "Việc một phần mềm có là nguồn mở hay không phụ thuộc hoàn toàn vào giấy phép bản quyền do tác giả quyết định, không phụ thuộc vào ngôn ngữ lập trình Python"
+                ]
+            },
+            {
+                id: 12,
+                title: "Cách kết nối thiết bị số với máy tính có phụ thuộc vào loại thiết bị không?",
+                keyPoints: [
+                    "Có phụ thuộc vào loại thiết bị",
+                    "Mỗi thiết bị có các cổng kết nối khác nhau và yêu cầu phương thức/chuẩn kết nối khác nhau phù hợp đặc thù phần cứng"
+                ]
+            },
+            {
+                id: 13,
+                title: "Khi mua một màn hình mới để làm việc với máy tính, các thông số kỹ thuật nào của màn hình là quan trọng nhất cần cân nhắc, và ý nghĩa cơ bản của chúng là gì?",
+                keyPoints: [
+                    "Kích thước (quyết định không gian hiển thị làm việc) và độ phân giải (số lượng điểm ảnh, quyết định độ sắc nét)",
+                    "Tần số quét (số khung hình/giây giúp chuyển động mượt mà) và thời gian phản hồi (tốc độ đổi màu của điểm ảnh)",
+                    "Khả năng thể hiện màu sắc (độ chuẩn xác, trung thực của dải màu)"
+                ]
+            },
+            {
+                id: 14,
+                title: "Vì sao khi kết nối các thiết bị số (như máy in, điện thoại thông minh, máy ảnh...) với máy tính, cách thức kết nối và các cổng sử dụng lại không giống nhau cho mọi thiết bị?",
+                keyPoints: [
+                    "Không có một phương thức kết nối chung duy nhất cho tất cả các thiết bị số",
+                    "Mỗi loại thiết bị có đặc thù riêng về tốc độ truyền dữ liệu, tính di động và cấu trúc phần cứng",
+                    "Đòi hỏi các chuẩn giao tiếp/cổng kết nối khác nhau (USB, HDMI, VGA...) hoặc phương thức không dây (Bluetooth, Wi-Fi)"
+                ]
+            },
+            {
+                id: 15,
+                title: "Hãy nêu các bước cơ bản để kết nối máy tính xách tay với một màn hình ngoài hoặc tivi thông minh nhằm sử dụng làm màn hình mở rộng (hoặc trình chiếu).",
+                keyPoints: [
+                    "Dùng cáp chuyên dụng (như HDMI) cắm nối cổng trên máy tính và cổng tương ứng trên màn hình ngoài/tivi",
+                    "Bật nguồn thiết bị và dùng điều khiển (remote) chọn đúng cổng nguồn vào tương ứng (ví dụ: HDMI 1, HDMI 2)",
+                    "Trên máy tính, sử dụng tổ hợp phím Windows + P để chọn chế độ hiển thị phù hợp (Duplicate, Extend,...)"
+                ]
+            }
+        ];
+
+        // State Variables
+        let selectedQuestions = [];
+        let studentData = {};
+        let isExamActive = false;
+        let cheatDetected = false;
+
+        // --- FULLSCREEN & ANTI-CHEAT LOGIC ---
+
+        function enterFullScreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log(err));
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen().catch(err => console.log(err));
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen().catch(err => console.log(err));
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen().catch(err => console.log(err));
+            }
+        }
+
+        document.addEventListener('fullscreenchange', handleCheatDetection);
+        document.addEventListener('webkitfullscreenchange', handleCheatDetection);
+        document.addEventListener('mozfullscreenchange', handleCheatDetection);
+        document.addEventListener('MSFullscreenChange', handleCheatDetection);
+
+        window.addEventListener('blur', () => {
+            if (isExamActive) triggerCheatTermination("Rời khỏi ứng dụng / Chuyển Tab");
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (!isExamActive) return;
+            if (
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+                (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 'c' || e.key === 'C' || e.key === 'v' || e.key === 'V'))
+            ) {
+                e.preventDefault();
+                triggerCheatTermination("Sử dụng phím tắt can thiệp / Cố tình copy-paste");
+            }
+        });
+
+        document.addEventListener('contextmenu', (e) => {
+            if (isExamActive) e.preventDefault();
+        });
+
+        function preventPaste(e) {
+            e.preventDefault();
+            alert("THÔNG BÁO CHỐNG GIAN LẬN:\nKhông cho phép DÁN (Paste) dữ liệu vào ô trả lời. Vui lòng tự gõ câu trả lời!");
+        }
+
+        function handleCheatDetection() {
+            const isFull = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+            if (isExamActive && !isFull) {
+                triggerCheatTermination("Thoát chế độ Fullscreen (Toàn màn hình)");
+            }
+        }
+
+        function triggerCheatTermination(reason) {
+            if (!isExamActive || cheatDetected) return;
+            cheatDetected = true;
+            isExamActive = false;
+
+            // Lock system for 20 minutes
+            localStorage.setItem('exam_lock_until', Date.now() + 20 * 60 * 1000);
+
+            alert(`CẢNH BÁO GIAN LẬN!\nHệ thống phát hiện vi phạm quy chế: ${reason}.\nBài làm của bạn sẽ được tự động nộp ngay lập tức! Hệ thống khóa 20 phút.`);
+            document.getElementById('cheat-flag-banner').classList.remove('hidden');
+            processGrading();
+        }
+
+        // --- EXAM CONTROL FLOW ---
+
+        function startExam(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('student-name').value.trim();
+            const stt = document.getElementById('student-stt').value.trim();
+            const className = document.getElementById('student-class').value;
+
+            if (!name || !stt || !className) {
+                alert("Vui lòng điền đầy đủ Họ tên, STT và chọn Lớp!");
+                return;
+            }
+
+            studentData = { name, stt, className, apiKey: getGeminiKey() };
+
+            let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+            masterData.name = name;
+            masterData.className = className;
+            masterData.stt = stt;
+            masterData.step = 3;
+            localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+            // Chọn ngẫu nhiên 2 câu hỏi từ bộ đề 15 câu
+            const shuffled = [...QUESTION_BANK].sort(() => 0.5 - Math.random());
+            selectedQuestions = shuffled.slice(0, 2);
+
+            // Gán tiêu đề câu hỏi lên giao diện
+            document.getElementById('q1-title').innerText = selectedQuestions[0].title;
+            document.getElementById('q2-title').innerText = selectedQuestions[1].title;
+
+            document.getElementById('display-student-info').innerText = `${studentData.name} - STT: ${studentData.stt} - Lớp: ${studentData.className}`;
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('exam-screen').classList.remove('hidden');
+
+            enterFullScreen();
+            isExamActive = true;
+            cheatDetected = false;
+        }
+
+        function confirmSubmit() {
+            if (confirm("Bạn có chắc chắn muốn nộp bài và bắt đầu chấm điểm không?")) {
+                isExamActive = false;
+                localStorage.setItem('exam_lock_until', Date.now() + 20 * 60 * 1000);
+                processGrading();
+            }
+        }
+
+        // --- AI GRADING LOGIC ---
+
+        function roundCustomScore(val) {
+            if (val <= 0) return 0;
+            const intPart = Math.floor(val);
+            const decPart = val - intPart;
+
+            let roundedDec = 0;
+            if (decPart < 0.15) {
+                roundedDec = 0.0;
+            } else if (decPart < 0.4) {
+                roundedDec = 0.3;
+            } else if (decPart < 0.65) {
+                roundedDec = 0.5;
+            } else if (decPart < 0.9) {
+                roundedDec = 0.8;
+            } else {
+                return intPart + 1.0;
+            }
+
+            return intPart + roundedDec;
+        }
+
+        async function processGrading() {
+            document.getElementById('exam-screen').classList.add('hidden');
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            const ans1 = document.getElementById('q1-answer').value.trim();
+            const ans2 = document.getElementById('q2-answer').value.trim();
+
+            const apiKey = studentData.apiKey || getGeminiKey();
+
+            const eval1 = await evaluateAnswerWithAI(selectedQuestions[0], ans1, apiKey);
+            const eval2 = await evaluateAnswerWithAI(selectedQuestions[1], ans2, apiKey);
+
+            const rawTotalScore = eval1.score + eval2.score;
+            const finalScore = roundCustomScore(rawTotalScore);
+
+            // Lưu điểm phần 3 và cập nhật trạng thái DONE
+            let masterData = JSON.parse(localStorage.getItem('master_exam_data') || '{}');
+            masterData.p3 = finalScore;
+            masterData.step = 'DONE';
+            localStorage.setItem('master_exam_data', JSON.stringify(masterData));
+
+            setTimeout(() => {
+                const resultScreen = document.getElementById('result-screen');
+                if (resultScreen && !document.getElementById('btn-goto-summary')) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<button id="btn-goto-summary" onclick="parent.postMessage({examGo:'index'},'*')" style="background-color:#10b981; color:white; padding:16px; font-size:1.2rem; font-weight:bold; border:none; border-radius:12px; cursor:pointer; width:100%; margin-top: 30px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">🏁 XEM TRANG TỔNG KẾT ĐIỂM 10 & TẢI FILE TỔNG (.TXT)</button>`;
+                    resultScreen.appendChild(div);
+                }
+            }, 100);
+
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            document.getElementById('result-student-info').innerText = `${studentData.name} | STT: ${studentData.stt} | Lớp: ${studentData.className}`;
+            document.getElementById('final-score').innerText = `${finalScore.toFixed(1)} / 2.0`;
+
+            const detailsContainer = document.getElementById('evaluation-details');
+            detailsContainer.innerHTML = `
+                ${renderQuestionEvaluation(1, selectedQuestions[0], ans1, eval1)}
+                ${renderQuestionEvaluation(2, selectedQuestions[1], ans2, eval2)}
+            `;
+        }
+
+        async function evaluateAnswerWithAI(question, studentAnswer, apiKey) {
+            if (!studentAnswer) {
+                return {
+                    matchedPoints: 0,
+                    totalPoints: question.keyPoints.length,
+                    score: 0,
+                    feedback: "Học sinh không nhập câu trả lời.",
+                    pointDetails: question.keyPoints.map(kp => ({ point: kp, isCorrect: false }))
+                };
+            }
+
+            const totalKeyPoints = question.keyPoints.length;
+            let pointPerIdea = 1.0;
+            if (totalKeyPoints === 2) pointPerIdea = 0.5;
+            if (totalKeyPoints === 3) pointPerIdea = 0.33;
+
+            const systemPrompt = `Bạn là một giáo viên Tin học chấm thi tự luận cực kỳ chính xác. 
+Nhiệm vụ của bạn là so trùng ý (semantic matching) câu trả lời của học sinh với danh sách các Ý ĐÚNG đáp án.
+
+QUY TẮC CẦN THỰC HIỆN:
+1. Đánh giá từng Ý ĐÚNG xem học sinh có diễn đạt đúng hoặc đồng nghĩa không.
+2. Trả về định dạng JSON hợp lệ theo đúng cấu trúc yêu cầu. Không thêm markdown hay văn bản ngoài JSON.`;
+
+            const userPrompt = `
+CÂU HỎI: ${question.title}
+
+CÁC Ý ĐÚNG CẦN SO TRÙNG (${totalKeyPoints} ý):
+${question.keyPoints.map((kp, idx) => `${idx + 1}.${kp}`).join('\n')}
+
+CÂU TRẢ LỜI CỦA HỌC SINH:
+"${studentAnswer}"
+
+YÊU CẦU ĐẦU RA JSON KHÔNG DÙNG BACKTICKS (Chỉ dùng thuần JSON):
+{
+    "evaluations": [
+        {
+            "pointIndex": 1,
+            "isCorrect": true/false,
+            "reason": "Giải thích ngắn gọn tại sao ý này đúng/sai dựa vào bài làm"
+        }
+    ],
+    "generalFeedback": "Nhận xét tổng quan ngắn gọn về bài làm"
+}
+`;
+
+            try {
+                if (!apiKey) throw new Error('Chưa cài API key - dùng chấm dự phòng');
+                const targetModel = "gemini-2.5-flash";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userPrompt }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json"
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error ${response.status}`);
+                }
+
+                const data = await response.json();
+                const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                const result = JSON.parse(jsonText);
+
+                let correctCount = 0;
+                const pointDetails = question.keyPoints.map((kp, idx) => {
+                    const evalItem = result.evaluations?.find(e => e.pointIndex === (idx + 1));
+                    const isCorrect = evalItem ? evalItem.isCorrect : false;
+                    if (isCorrect) correctCount++;
+                    return {
+                        point: kp,
+                        isCorrect: isCorrect,
+                        reason: evalItem ? evalItem.reason : ""
+                    };
+                });
+
+                const rawScore = correctCount * pointPerIdea;
+
+                return {
+                    matchedPoints: correctCount,
+                    totalPoints: totalKeyPoints,
+                    score: rawScore,
+                    feedback: result.generalFeedback || "Đã so trùng ý hoàn tất.",
+                    pointDetails: pointDetails
+                };
+
+            } catch (err) {
+                console.error("AI Grading Error, falling back to heuristic evaluation:", err);
+                return fallbackEvaluation(question, studentAnswer, pointPerIdea);
+            }
+        }
+
+        function fallbackEvaluation(question, studentAnswer, pointPerIdea) {
+            let correctCount = 0;
+            const lowerAns = studentAnswer.toLowerCase();
+
+            const pointDetails = question.keyPoints.map(kp => {
+                const words = kp.toLowerCase().split(' ').filter(w => w.length > 3);
+                const matches = words.filter(w => lowerAns.includes(w));
+                const isCorrect = matches.length >= Math.ceil(words.length * 0.35);
+                if (isCorrect) correctCount++;
+                return {
+                    point: kp,
+                    isCorrect: isCorrect,
+                    reason: isCorrect ? "Tương đối đủ ý chính." : "Thiếu hoặc chưa thể hiện rõ ý này."
+                };
+            });
+
+            return {
+                matchedPoints: correctCount,
+                totalPoints: question.keyPoints.length,
+                score: correctCount * pointPerIdea,
+                feedback: "Chấm tự động (Hệ thống dự phòng offline).",
+                pointDetails: pointDetails
+            };
+        }
+
+        function renderQuestionEvaluation(qIndex, question, answer, evalData) {
+            return `
+                <div class="border border-slate-200 rounded-xl p-5 bg-slate-50 space-y-3">
+                    <div class="flex justify-between items-start gap-2 border-b border-slate-200 pb-3">
+                        <h4 class="font-bold text-indigo-700">Câu ${qIndex}: ${question.title}</h4>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-1 rounded-lg shrink-0">
+                            Khớp ${evalData.matchedPoints}/${evalData.totalPoints} ý (+${evalData.score.toFixed(2)}đ)
+                        </span>
+                    </div>
+
+                    <div class="text-sm">
+                        <span class="font-semibold text-slate-700">Bài làm của học sinh:</span>
+                        <p class="mt-1 p-3 bg-white rounded-lg border border-slate-200 text-slate-800 italic">
+                            "${answer || "Không trả lời"}"
+                        </p>
+                    </div>
+
+                    <div class="space-y-2 text-sm pt-1">
+                        <span class="font-semibold text-slate-700">Kết quả so trùng từng ý:</span>
+                        ${evalData.pointDetails.map((pd, idx) => `
+                            <div class="flex items-start gap-2 p-2.5 rounded-lg ${pd.isCorrect ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-red-50 border border-red-200 text-red-900'}">
+                                <i class="fa-solid ${pd.isCorrect ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-red-600'} mt-0.5"></i>
+                                <div class="flex-grow">
+                                    <div class="font-medium">Ý ${idx + 1}:${pd.point}</div>
+                                    <div class="text-xs ${pd.isCorrect ? 'text-emerald-700' : 'text-red-700'} mt-0.5">${pd.reason}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="text-xs text-slate-500 bg-white p-2.5 rounded-lg border border-slate-200">
+                        <b>Nhận xét AI:</b> ${evalData.feedback}
+                    </div>
+                </div>
+            `;
+        }
+    <\/script>
+</body>
+</html></script>
+<script>
+
+        // ===== GỘP 4 TRANG: chạy các phần thi trong khung riêng, cùng origin/localStorage =====
+        function showStage(n) {
+            const tpl = document.getElementById('tpl-' + n);
+            const frame = document.getElementById('exam-frame');
+            frame.srcdoc = tpl.textContent.split('<\\/script').join('</script');
+            frame.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function leaveStages() {
+            const frame = document.getElementById('exam-frame');
+            frame.classList.add('hidden');
+            frame.removeAttribute('srcdoc');
+            document.body.style.overflow = '';
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+        }
+        window.addEventListener('message', (e) => {
+            if (!e.data || !e.data.examGo) return;
+            const go = e.data.examGo;
+            if (go === 'index') { leaveStages(); checkExamState(); }
+            else showStage(parseInt(go, 10));
+        });
+
+        // API key chấm AI: KHÔNG lưu trong mã nguồn. Giáo viên nhập 1 lần trên mỗi máy (lưu localStorage).
+        function setApiKey() {
+            const pwd = prompt("Nhập mật khẩu giáo viên:");
+            if (pwd === null) return;
+            if (textToBinary(pwd.trim()) !== resetBinaryKey) { alert("Mật khẩu không chính xác!"); return; }
+            const cur = localStorage.getItem('gemini_api_key') || '';
+            const key = prompt("Dán Gemini API key (để trống = xóa key, hệ thống chấm dự phòng):", cur);
+            if (key === null) return;
+            if (key.trim()) { localStorage.setItem('gemini_api_key', key.trim()); alert("Đã lưu API key trên máy này."); }
+            else { localStorage.removeItem('gemini_api_key'); alert("Đã xóa API key."); }
+        }
         function textToBinary(text) {
             let result = '';
             for (let i = 0; i < text.length; i++) {
@@ -181,9 +2577,7 @@
 
         const resetBinaryKey = "010000000100001101001111010011010101010101000001010101000100100001010101001100010011001000110011";
 
-        const FILE_P1 = "1.html";
-        const FILE_P2 = "2.html";
-        const FILE_P3 = "3.html";
+        
 
         // TẠO MÃ BẢO MẬT CHỐNG SỬA ĐIỂM
         function generateCheckCode(stt, name, className, p1, p2, p3, total) {
@@ -219,7 +2613,7 @@
             const studentInfo = { name, className, stt, step: 1, p1: null, p2: null, p3: null };
             localStorage.setItem('master_exam_data', JSON.stringify(studentInfo));
 
-            window.location.href = FILE_P1;
+            showStage(1);
         });
 
         function checkExamState() {
@@ -231,9 +2625,9 @@
             if (data.step === 'DONE' || (data.p1 !== null && data.p2 !== null && data.p3 !== null)) {
                 showSummaryScreen(data);
             } else if (data.step === 2) {
-                window.location.href = FILE_P2;
+                showStage(2);
             } else if (data.step === 3) {
-                window.location.href = FILE_P3;
+                showStage(3);
             }
         }
 

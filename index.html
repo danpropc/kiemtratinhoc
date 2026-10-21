@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Kiểm Tra Tin Học 11 - Điều Khởi Trung Tâm</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; }
+        
+        .card { background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 32px; max-width: 600px; width: 100%; text-align: center; position: relative; }
+        h1 { font-size: 1.6rem; color: #1e3a8a; margin-bottom: 8px; text-transform: uppercase; }
+        p.subtitle { font-size: 0.9rem; color: #64748b; margin-bottom: 24px; }
+        
+        .form-group { margin-bottom: 16px; text-align: left; }
+        label { display: block; font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 6px; }
+        input[type="text"], input[type="number"], input[type="password"] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none; }
+        input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        .btn { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+        .btn:hover { background: #1d4ed8; }
+        
+        .btn-teacher-reset {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #d97706;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .btn-teacher-reset:hover { background-color: #b45309; }
+        
+        .hidden { display: none !important; }
+        
+        #teacher-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: left;
+        }
+        
+        #summary-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 90vh;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .header-large {
+            font-size: 100px;
+            font-weight: 900;
+            color: #dc2626;
+            line-height: 1.1;
+            text-shadow: 3px 3px 10px rgba(220, 38, 38, 0.25);
+            margin-bottom: 30px;
+            word-break: break-word;
+        }
+        
+        .score-board {
+            background: #ffffff;
+            border: 4px solid #dc2626;
+            border-radius: 24px;
+            padding: 30px 50px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .score-total {
+            font-size: 80px;
+            font-weight: 900;
+            color: #2563eb;
+            margin: 10px 0;
+        }
+        
+        .score-breakdown {
+            font-size: 1.25rem;
+            color: #334155;
+            margin-top: 20px;
+            line-height: 2;
+            text-align: left;
+            border-top: 2px dashed #e2e8f0;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <button type="button" class="btn-teacher-reset" onclick="openTeacherModal()">🔓 Mở Khóa / Reset</button>
+
+    <div id="start-card" class="card">
+        <h1>KỲ THI GIỮA KỲ TIN HỌC 11</h1>
+        <p class="subtitle">Hệ thống thi 3 phần liên tiếp (Tổng điểm: 10.0)</p>
+        
+        <form id="start-form">
+            <div class="form-group">
+                <label>Họ và Tên Học Sinh:</label>
+                <input type="text" id="student-name" required placeholder="Nhập đầy đủ họ tên...">
+            </div>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Lớp:</label>
+                    <input type="text" id="student-class" required placeholder="Ví dụ: 10C03">
+                </div>
+                <div class="form-group">
+                    <label>Số Thứ Tự (STT):</label>
+                    <input type="number" id="student-stt" required min="1" placeholder="Ví dụ: 15">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn">BẮT ĐẦU LÀM BÀI (PHẦN 1)</button>
+        </form>
+    </div>
+
+    <div id="summary-screen" class="hidden">
+        <div class="header-large" id="out-header-info">
+            STT - HỌ TÊN - LỚP
+        </div>
+        
+        <div class="score-board">
+            <div style="font-size: 1.6rem; font-weight: bold; color: #475569; text-transform: uppercase;">TỔNG ĐIỂM KIỂM TRA</div>
+            <div class="score-total" id="out-total-score">0.0 / 10</div>
+            
+            <div class="score-breakdown">
+                <p><b>• Phần 1 (Trắc nghiệm 30 câu):</b> <span id="out-p1" style="color:#2563eb; font-weight:bold;">0.0</span> / 6.0 điểm</p>
+                <p><b>• Phần 2 (Đúng/Sai 2 câu):</b> <span id="out-p2" style="color:#2563eb; font-weight:bold;">0.0</span> / 2.0 điểm</p>
+                <p><b>• Phần 3 (Tự luận AI 2 câu):</b> <span id="out-p3" style="color:#2563eb; font-weight:bold;">0.0</span> / 2.0 điểm</p>
+            </div>
+
+            <button type="button" class="btn" style="background-color: #d97706; margin-top: 25px;" onclick="openTeacherModal()">🔓 GIÁO VIÊN RESET CHO LỚP SAU THI</button>
+        </div>
+    </div>
+
+    <div id="teacher-modal">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; color: #1e3a8a; margin-bottom: 10px;">🔑 Xác Thực Giáo Viên</h3>
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 15px;">Nhập mật khẩu để reset hệ thống cho lớp tiếp theo:</p>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <input type="password" id="teacher-pass-input" placeholder="Nhập mật khẩu..." autofocus>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn" style="background-color: #16a34a; margin-top: 0; flex: 1;" onclick="submitTeacherPass()">Xác Nhận</button>
+                <button type="button" class="btn" style="background-color: #64748b; margin-top: 0; flex: 1;" onclick="closeTeacherModal()">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function textToBinary(text) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                let bin = text.charCodeAt(i).toString(2);
+                result += '0'.repeat(8 - bin.length) + bin;
+            }
+            return result;
+        }
+
+        const resetBinaryKey = "010000000100001101001111010011010101010101000001010101000100100001010101001100010011001000110011";
+
+        const FILE_P1 = "1.html";
+        const FILE_P2 = "2.html";
+        const FILE_P3 = "3.html";
+
+        // TẠO MÃ BẢO MẬT CHỐNG SỬA ĐIỂM
+        function generateCheckCode(stt, name, className, p1, p2, p3, total) {
+            const secretSalt = "THPT_NHC_2026_THAO";
+            const raw = `${stt}|${name.trim().toUpperCase()}|${className}|${p1}|${p2}|${p3}|${total}|${secretSalt}`;
+            let hash = 5381;
+            for (let i = 0; i < raw.length; i++) {
+                hash = ((hash << 5) + hash) + raw.charCodeAt(i);
+            }
+            return 'AUTH-' + Math.abs(hash).toString(16).toUpperCase();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkExamState();
+
+            const passInput = document.getElementById('teacher-pass-input');
+            if (passInput) {
+                passInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        submitTeacherPass();
+                    }
+                });
+            }
+        });
+
+        document.getElementById('start-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('student-name').value.trim();
+            const className = document.getElementById('student-class').value.trim();
+            const stt = document.getElementById('student-stt').value.trim();
+
+            const studentInfo = { name, className, stt, step: 1, p1: null, p2: null, p3: null };
+            localStorage.setItem('master_exam_data', JSON.stringify(studentInfo));
+
+            window.location.href = FILE_P1;
+        });
+
+        function checkExamState() {
+            const dataStr = localStorage.getItem('master_exam_data');
+            if (!dataStr) return;
+
+            const data = JSON.parse(dataStr);
+
+            if (data.step === 'DONE' || (data.p1 !== null && data.p2 !== null && data.p3 !== null)) {
+                showSummaryScreen(data);
+            } else if (data.step === 2) {
+                window.location.href = FILE_P2;
+            } else if (data.step === 3) {
+                window.location.href = FILE_P3;
+            }
+        }
+
+        function showSummaryScreen(data) {
+            const p1 = parseFloat(data.p1) || 0;
+            const p2 = parseFloat(data.p2) || 0;
+            const p3 = parseFloat(data.p3) || 0;
+            const total = (p1 + p2 + p3).toFixed(1);
+
+            document.getElementById('start-card').classList.add('hidden');
+            document.getElementById('summary-screen').classList.remove('hidden');
+
+            document.getElementById('out-header-info').innerText = `${data.stt} - ${data.name.toUpperCase()} - ${data.className}`;
+            document.getElementById('out-total-score').innerText = `${total} / 10`;
+            document.getElementById('out-p1').innerText = p1.toFixed(1);
+            document.getElementById('out-p2').innerText = p2.toFixed(2);
+            document.getElementById('out-p3').innerText = p3.toFixed(1);
+
+            // Tự động tải ngầm file TXT (chuẩn Data URI gốc)
+            if (!sessionStorage.getItem('downloaded_txt_session')) {
+                const fileName = `${data.stt} ${data.name} ${data.className}.txt`;
+                const authCode = generateCheckCode(data.stt, data.name, data.className, p1.toFixed(1), p2.toFixed(2), p3.toFixed(1), total);
+                
+                const fileContent = 
+`==================================================
+KẾT QUẢ BÀI KIỂM TRA TIN HỌC 11
+==================================================
+Họ và tên: ${data.name}
+Lớp: ${data.className}
+Số thứ tự (STT): ${data.stt}
+Thời gian nộp: ${new Date().toLocaleString('vi-VN')}
+--------------------------------------------------
+- Điểm Phần 1 (Trắc nghiệm 30 câu): ${p1.toFixed(1)} / 6.0 điểm
+- Điểm Phần 2 (Đúng/Sai 2 câu):     ${p2.toFixed(2)} / 2.0 điểm
+- Điểm Phần 3 (Tự luận AI 2 câu):   ${p3.toFixed(1)} / 2.0 điểm
+--------------------------------------------------
+TỔNG ĐIỂM CUỐI CÙNG: ${total} / 10.0 ĐIỂM
+--------------------------------------------------
+MÃ XÁC THỰC BẢO MẬT: [${authCode}]
+(Cảnh báo: Nếu tự ý sửa điểm, mã xác thực này sẽ bị sai lệch so với dữ liệu gốc của giáo viên).
+==================================================`;
+
+                downloadTxtFile(fileName, fileContent);
+                sessionStorage.setItem('downloaded_txt_session', 'true');
+            }
+        }
+
+        // HÀM TẢI GỐC CỦA BẠN (TỰ ĐỘNG CHUI VÀO DOWNLOADS)
+        function downloadTxtFile(filename, text) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function openTeacherModal() {
+            document.getElementById('teacher-pass-input').value = '';
+            document.getElementById('teacher-modal').style.display = 'flex';
+            document.getElementById('teacher-pass-input').focus();
+        }
+
+        function closeTeacherModal() {
+            document.getElementById('teacher-modal').style.display = 'none';
+        }
+
+        function submitTeacherPass() {
+            const pwd = document.getElementById('teacher-pass-input').value;
+            if (pwd !== null && pwd.trim() !== '') {
+                if (textToBinary(pwd.trim()) === resetBinaryKey) {
+                    localStorage.removeItem('master_exam_data');
+                    sessionStorage.removeItem('downloaded_txt_session');
+                    localStorage.removeItem('exam_lock_until');
+                    localStorage.removeItem('quiz_last_submit_time');
+                    closeTeacherModal();
+                    alert("Reset thành công! Hệ thống đã sẵn sàng cho lớp tiếp theo vào thi.");
+                    location.reload();
+                } else {
+                    alert("Mật khẩu không chính xác!");
+                    document.getElementById('teacher-pass-input').value = '';
+                    document.getElementById('teacher-pass-input').focus();
+                }
+            } else {
+                alert("Vui lòng nhập mật khẩu!");
+            }
+        }
+    </script>
+</body>
+</html>
